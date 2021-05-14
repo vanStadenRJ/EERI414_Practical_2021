@@ -8,8 +8,11 @@
 // PROJECT NAME         : ChebyshevFilterGenerator           
 // ---------------------------------------------------------------------------
 
+#define _USE_MATH_DEFINES
+
 // ---------------------------------------------------------------------------
 // SYSTEM INCLUDE FILES
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -17,6 +20,7 @@
 #include <sstream>
 #include <iterator>
 #include <tchar.h>
+#include <cmath>
 #include <windows.h>
 #include <string>
 #include <sstream>
@@ -36,6 +40,11 @@
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error: %d: %s\n", error, description);
 }
+
+// GLOBAL FUNCTION DECLERATIONS
+void test_PlotData(std::vector<float>& vsPlotData, ImGuiCond& plotCondition);
+
+// GLOBAL VARIABLE DECLERATIONS
 
 ImVec4 foreground_color = ImVec4(0.258, 0.529, 0.561, 1);
 
@@ -69,6 +78,8 @@ int main(int argc, char* argv[])
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
+    std::vector<float> vfTest;
+
     // ---------- MAIN PROGRAM LOOP ----------
     while (!glfwWindowShouldClose(window))
     {
@@ -80,6 +91,33 @@ int main(int argc, char* argv[])
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
+        // =======================
+        // Enter Program Code Here
+        // =======================
+
+        // DISPLAY INPUT PANEL
+        ImGui::SetNextWindowSize(ImVec2(1024, 60));
+        ImGui::SetNextWindowPos(ImVec2(20, 20));
+        ImGui::Begin(" ");
+        ImGuiWindowFlags window_flags = 0;
+        window_flags |= ImGuiWindowFlags_NoTitleBar;
+
+        // IF BUTTON PRESSED CALCULATE DATA AND THEN DISPLAY
+        std::vector<float> vfData;
+        if (ImGui::Button("PRESS FOR CALCULATION", ImVec2(150, 25))) {
+            // PLOT DATA BASED ON INPUT DATA            
+            for (int i = 0; i <= 360; i++) {
+                vfTest.push_back(sin(i * (M_PI / 180)));
+                std::cout << vfTest.size() << std::endl;
+            }             
+        }  
+        vfData = vfTest;
+        ImGuiCond cond_Plot = ImGuiCond_Always;
+        test_PlotData(vfData, cond_Plot);
+        ImGui::End();
+
+        
+
         // =======================
         // Enter Program Code Here
         // =======================
@@ -107,4 +145,30 @@ int main(int argc, char* argv[])
     glfwTerminate();
 
     return 0;
+}
+
+void test_PlotData(std::vector<float> &vsPlotData, ImGuiCond &plotCondition)
+{
+    //ImGuiCond condPlot = plotCondition;
+    ImGui::SetNextWindowPos(ImVec2(20, 100));
+    ImGui::SetNextWindowSize(ImVec2(1024, 780));
+    ImGui::Begin("TEST PLOT APP");
+
+    // ONLY IF VECTOR IS POPULATED - PLOT DATA
+    if (vsPlotData.size() != 0) {
+        // START PLOT INSTANCE
+        ImGui::SetCursorPosY(50);
+        ImPlot::SetNextPlotLimits(0, vsPlotData.size() + 10, *std::min_element(vsPlotData.begin(), vsPlotData.end()) - 1, *std::max_element(vsPlotData.begin(), vsPlotData.end()) + 1, plotCondition);
+        ImPlot::BeginPlot("PLOT OF SINE WAVE", "Y AXIS", "X AXIS", ImVec2(ImGui::GetWindowWidth() - 18, ImGui::GetWindowHeight() - 158));
+
+        float* dat_y = new float[vsPlotData.size()];
+        float* dat_x = new float[vsPlotData.size()];
+        for (int i = 0; i < vsPlotData.size(); i++) {
+            dat_y[i] = vsPlotData[i];
+            dat_x[i] = i;
+        }
+        ImPlot::PlotLine("Test Plot", dat_x, dat_y, vsPlotData.size());
+        ImPlot::EndPlot();
+    }    
+    ImGui::End();
 }
