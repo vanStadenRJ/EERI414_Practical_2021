@@ -36,6 +36,7 @@
 #include "implot.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "SignalGenerator.h"
 
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error: %d: %s\n", error, description);
@@ -45,6 +46,7 @@ static void glfw_error_callback(int error, const char* description) {
 void test_PlotData(std::vector<float>& vsPlotData, ImGuiCond& plotCondition);
 
 // GLOBAL VARIABLE DECLERATIONS
+std::shared_ptr<SignalGenerator> pLocalSignal = std::make_shared<SignalGenerator>(2500, 5000, 10, 1000, 0);
 
 ImVec4 foreground_color = ImVec4(0.258, 0.529, 0.561, 1);
 
@@ -80,6 +82,10 @@ int main(int argc, char* argv[])
 
     std::vector<float> vfTest;
 
+    // RESET INPUT VARIABLES
+
+
+
     // ---------- MAIN PROGRAM LOOP ----------
     while (!glfwWindowShouldClose(window))
     {
@@ -102,10 +108,14 @@ int main(int argc, char* argv[])
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
 
+        ImGui::Text("Input Sample Rate");
+        //ImGui::SetCursorPosX(currentPosX);
+
         // IF BUTTON PRESSED CALCULATE DATA AND THEN DISPLAY
         std::vector<float> vfData;
         if (ImGui::Button("PRESS FOR CALCULATION", ImVec2(150, 25))) {
-            // PLOT DATA BASED ON INPUT DATA            
+            // PLOT DATA BASED ON INPUT DATA  
+            vfTest.clear();
             for (int i = 0; i <= 360; i++) {
                 vfTest.push_back(sin(i * (M_PI / 180)));
                 std::cout << vfTest.size() << std::endl;
