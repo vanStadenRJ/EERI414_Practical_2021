@@ -18,12 +18,18 @@
     <ClCompile Include="ChebyshevFilterGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SignalGenerator.cpp">
+    <ClCompile Include="cSignalGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cFastFourierTransform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SignalGenerator.h">
+    <ClInclude Include="cSignalGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cFastFourierTransform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -36,7 +36,7 @@
 #include "implot.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "SignalGenerator.h"
+#include "cSignalGenerator.h"
 
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error: %d: %s\n", error, description);
@@ -46,7 +46,7 @@ static void glfw_error_callback(int error, const char* description) {
 void test_PlotData(std::vector<float>& vsPlotData, ImGuiCond& plotCondition);
 
 // GLOBAL VARIABLE DECLERATIONS
-std::shared_ptr<SignalGenerator> pLocalSignal = std::make_shared<SignalGenerator>(2500, 5000, 10, 1000, 0);
+std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>(2500, 5000, 10, 1000, 0);
 
 ImVec4 foreground_color = ImVec4(0.258, 0.529, 0.561, 1);
 

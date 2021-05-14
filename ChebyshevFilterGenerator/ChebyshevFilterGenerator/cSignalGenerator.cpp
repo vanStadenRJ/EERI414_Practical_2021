@@ -18,9 +18,10 @@
 
 // ---------------------------------------------------------------------------
 // LOCAL INCLUDE FILES
-#include "SignalGenerator.h"
+#include "cSignalGenerator.h"
+#include "cFastFourierTransform.h"
 
-SignalGenerator::SignalGenerator(void) :
+cSignalGenerator::cSignalGenerator(void) :
 	m_iHighestFreq_Hz(0),
 	m_iLowestFreq_Hz(0),
 	m_iSampleFreq_Hz(0),
@@ -29,7 +30,7 @@ SignalGenerator::SignalGenerator(void) :
 	
 }
 
-SignalGenerator::SignalGenerator(int iSampleFreq_Hz, int iSignalLength_ms, int iLowestFreq_Hz, int iHighestFreq_Hz, int iSWeepType)
+cSignalGenerator::cSignalGenerator(int iSampleFreq_Hz, int iSignalLength_ms, int iLowestFreq_Hz, int iHighestFreq_Hz, int iSWeepType)
 {
 	m_iSampleFreq_Hz = iSampleFreq_Hz;			// Get Sample Rate from main
 	m_iLowestFreq_Hz = iLowestFreq_Hz;			// Get smallest Frequency in range for generation
@@ -41,17 +42,17 @@ SignalGenerator::SignalGenerator(int iSampleFreq_Hz, int iSignalLength_ms, int i
 }
 
 // ---------- GENERATE TIME-DOMAIN SIGNAL ----------
-std::vector<float> SignalGenerator::getSignal_Time()
+std::vector<float> cSignalGenerator::getSignal_Time()
 {
 	return m_vfSignal_Freq;
 }
 
-std::vector<float> SignalGenerator::getSignal_Freq()
+std::vector<float> cSignalGenerator::getSignal_Freq()
 {
 	return m_vfSignal_Freq;
 }
 
-void SignalGenerator::generateSignal(int iSweepType)
+void cSignalGenerator::generateSignal(int iSweepType)
 {
 	/*
 	Generate a 5 second Signal with frequencies ranging from 0 30 kHz
@@ -93,7 +94,9 @@ void SignalGenerator::generateSignal(int iSweepType)
 	this->calculateFFT();
 }
 
-void SignalGenerator::calculateFFT()
+void cSignalGenerator::calculateFFT()
 {
-	//
+	// Create new FFT object
+	std::shared_ptr<cFastFourierTransform> pLocalFFT = std::make_shared<cFastFourierTransform>();
+
 }

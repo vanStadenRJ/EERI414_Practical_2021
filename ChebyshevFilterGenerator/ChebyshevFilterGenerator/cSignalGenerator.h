@@ -6,12 +6,16 @@
 #include <vector>
 #include <cmath>
 
-class SignalGenerator
+// ---------------------------------------------------------------------------
+// LOCAL INCLUDE FILES
+
+
+class cSignalGenerator
 {
 public:
 	// Constructors
-	SignalGenerator();
-	SignalGenerator(int iSampleFreq_Hz, int iSignalLength_ms, int iLowestFreq_Hz, int iHighestFreq_Hz, int iSWeepType);
+	cSignalGenerator();
+	cSignalGenerator(int iSampleFreq_Hz, int iSignalLength_ms, int iLowestFreq_Hz, int iHighestFreq_Hz, int iSWeepType);
 
 	// Public Methods
 	std::vector<float> getSignal_Time();
