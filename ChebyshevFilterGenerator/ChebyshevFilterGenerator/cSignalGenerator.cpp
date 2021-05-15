@@ -37,8 +37,8 @@ cSignalGenerator::cSignalGenerator(int iSampleFreq_Hz, int iSignalLength_ms, int
 	m_iHighestFreq_Hz = iHighestFreq_Hz;		// Get largest frequency in range for generation
 	m_iSignalLength_ms = iSignalLength_ms;		// Get length of signal in seconds
 
-	this->generateSignal(iSWeepType);						// Generate the Time-Domain Signal	
-	this->calculateFFT();			// Calculate the FFT of the generated signal
+	this->generateSignal(iSWeepType);			// Generate the Time-Domain Signal	
+	this->calculateFFT();						// Calculate the FFT of the generated signal
 }
 
 // ---------- GENERATE TIME-DOMAIN SIGNAL ----------
@@ -89,14 +89,10 @@ void cSignalGenerator::generateSignal(int iSweepType)
 			break;
 		}		
 	}
-
-	// After calculating the Time-Domain variant of the signal, calculate FFT
-	this->calculateFFT();
 }
 
 void cSignalGenerator::calculateFFT()
 {
 	// Create new FFT object
 	std::shared_ptr<cFastFourierTransform> pLocalFFT = std::make_shared<cFastFourierTransform>();
-
 }

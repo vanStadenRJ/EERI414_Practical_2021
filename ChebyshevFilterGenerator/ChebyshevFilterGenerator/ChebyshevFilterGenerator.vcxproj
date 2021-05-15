@@ -97,7 +97,7 @@
       <AdditionalLibraryDirectories>..\FFTW\lib;..\DearImGui\DearImGui\GLFW;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /d /y "$(ProjectDir)fftw\bin\*.*" "$(TargetDir)"</Command>
+      <Command>xcopy /d /y "$(ProjectDir)..\FFTW\bin\*.*" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -119,7 +119,7 @@
       <AdditionalLibraryDirectories>..\FFTW\lib;..\DearImGui\DearImGui\GLFW;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /d /y "$(ProjectDir)fftw\bin\*.*" "$(TargetDir)"</Command>
+      <Command>xcopy /d /y "$(ProjectDir)..\FFTW\bin\*.*" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

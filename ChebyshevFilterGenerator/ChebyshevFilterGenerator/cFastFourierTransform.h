@@ -21,6 +21,7 @@ public:
 	void fft(fftw_complex* in, fftw_complex* out);
 	void ifft(fftw_complex* in, fftw_complex* out);
 	void displayComplex(fftw_complex* y);
+	void displayReal(fftw_complex* x);
 
 	// Public Attributes
 
@@ -28,6 +29,6 @@ private:
 	// Private Methods
 
 	// Private Attributes
-	const int m_iFFTSize;
+	int m_iFFTSize;
 };
 
