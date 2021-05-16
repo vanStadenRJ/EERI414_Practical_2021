@@ -15,11 +15,11 @@
 
 // ---------------------------------------------------------------------------
 // LIBRARY INCLUDE FILES
+#include <complex>
 
 // ---------------------------------------------------------------------------
 // LOCAL INCLUDE FILES
 #include "cSignalGenerator.h"
-#include "cFastFourierTransform.h"
 
 cSignalGenerator::cSignalGenerator(void) :
 	m_iHighestFreq_Hz(0),
@@ -30,7 +30,7 @@ cSignalGenerator::cSignalGenerator(void) :
 	
 }
 
-cSignalGenerator::cSignalGenerator(int iSampleFreq_Hz, int iSignalLength_ms, int iLowestFreq_Hz, int iHighestFreq_Hz, int iSWeepType)
+cSignalGenerator::cSignalGenerator(int &iSampleFreq_Hz, int &iSignalLength_ms, int &iLowestFreq_Hz, int &iHighestFreq_Hz, int iSWeepType)
 {
 	m_iSampleFreq_Hz = iSampleFreq_Hz;			// Get Sample Rate from main
 	m_iLowestFreq_Hz = iLowestFreq_Hz;			// Get smallest Frequency in range for generation
@@ -38,13 +38,12 @@ cSignalGenerator::cSignalGenerator(int iSampleFreq_Hz, int iSignalLength_ms, int
 	m_iSignalLength_ms = iSignalLength_ms;		// Get length of signal in seconds
 
 	this->generateSignal(iSWeepType);			// Generate the Time-Domain Signal	
-	this->calculateFFT();						// Calculate the FFT of the generated signal
 }
 
 // ---------- GENERATE TIME-DOMAIN SIGNAL ----------
 std::vector<float> cSignalGenerator::getSignal_Time()
 {
-	return m_vfSignal_Freq;
+	return m_vfSignal_Time;
 }
 
 std::vector<float> cSignalGenerator::getSignal_Freq()
@@ -52,14 +51,13 @@ std::vector<float> cSignalGenerator::getSignal_Freq()
 	return m_vfSignal_Freq;
 }
 
-void cSignalGenerator::generateSignal(int iSweepType)
+void cSignalGenerator::generateSignal(int &iSweepType)
 {
 	/*
 	Generate a 5 second Signal with frequencies ranging from 0 30 kHz
 	- Sweep for 0 khz- 30kHz in first 2.5 seconds
 	- Sweep from 30kHz - 0kHz in last 2.5 seconds	
 	*/
-
 	float T = (float)m_iSignalLength_ms / (float)1000;
 	float fNrSamples = T * m_iSampleFreq_Hz;
 
@@ -91,8 +89,17 @@ void cSignalGenerator::generateSignal(int iSweepType)
 	}
 }
 
+/*
 void cSignalGenerator::calculateFFT()
 {
 	// Create new FFT object
-	std::shared_ptr<cFastFourierTransform> pLocalFFT = std::make_shared<cFastFourierTransform>();
+	std::shared_ptr<cFastFourierTransform> pLocalFFT = std::make_shared<cFastFourierTransform>(m_vfSignal_Time);
+
+	// Create new complex Vector
+	std::vector<std::complex<float>> vfFFT_complex = pLocalFFT->getFFT();
+
+	// Get Magnitude Spectrum
+
+	// Get Phase Spectrum
 }
+*/

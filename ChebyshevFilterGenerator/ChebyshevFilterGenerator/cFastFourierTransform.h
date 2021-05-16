@@ -17,12 +17,11 @@ class cFastFourierTransform
 public:
 	// Constructors
 	cFastFourierTransform();
-	cFastFourierTransform(std::vector<float>& vfSignal_Time);
 
 	// Public Methods
-	std::vector<std::complex<float>> getFFT();
-	std::vector<float> getMagnitude(std::vector<std::complex<float>> &vfFFT_complex);
-	std::vector<float> getPhase(std::vector<std::complex<float>>& vfFFT_complex);
+	void getFFT(std::vector<float>& vfSignal_Time);
+	std::vector<float> getMagnitude();
+	std::vector<float> getPhase();
 
 	// Public Attributes
 
@@ -32,11 +31,16 @@ private:
 	void ifft(fftw_complex* in, fftw_complex* out);
 	void displayComplex(fftw_complex* y);
 	void displayReal(fftw_complex* x);
+	void setMagnitude(std::vector<std::complex<float>>& vfFFT_complex);
+	void setPhase(std::vector<std::complex<float>>& vfFFT_complex);
 	//std::vector<float> getMagnitude();
 	//std::vector<float> getPhase();
 
 	// Private Attributes
 	int m_iFFTSize;
+	std::vector<std::complex<float>> m_vfFFT_complex;
+	std::vector<float> m_vfMagnitude;
+	std::vector<float> m_vfPhase;
 	fftw_complex* x;
 	fftw_complex* y;
 };

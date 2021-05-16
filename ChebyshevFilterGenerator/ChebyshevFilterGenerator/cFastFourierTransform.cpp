@@ -27,34 +27,11 @@
 cFastFourierTransform::cFastFourierTransform():
 	m_iFFTSize(0)
 {
-	// Input array
-	x = new fftw_complex[N];
-
-	// Output array
-	y = new fftw_complex[N];
-
-	// Populate the Array with values for sampling rate
-	for (int i = 0; i < N; i++) {
-		x[i][REAL] = (float)i/(float)9 + 1;
-		x[i][IMAG] = 0;
-	}
-
-	// Compute FFT
-	this->fft(x, y);
-
-	// Display the results
-	std::cout << "FFT:" << std::endl;
-	//this->displayComplex(y);
-
-	// Compute IFFT
-	this->ifft(y, x);
-
-	// Display the results
-	std::cout << "\nIFFT:" << std::endl;
-	//this->displayReal(x);
+	// DEFAULT CONSTRUCTOR
 }
 
-cFastFourierTransform::cFastFourierTransform(std::vector<float>& vfSignal_Time)
+// ---------- RETURN FFT IN VECTOR FORMAT ----------
+void cFastFourierTransform::getFFT(std::vector<float>& vfSignal_Time)
 {
 	// Set FFT array size
 	m_iFFTSize = vfSignal_Time.size();
@@ -65,72 +42,87 @@ cFastFourierTransform::cFastFourierTransform(std::vector<float>& vfSignal_Time)
 	// Output array
 	y = new fftw_complex[N];
 
+	int u = 0;
+
 	// Populate the Array with values for sampling rate
 	for (int i = 0; i < m_iFFTSize; i++) {
 		x[i][REAL] = vfSignal_Time.at(i);
 		x[i][IMAG] = 0;
+		u++;
 	}
 
+	std::cout << "Length Before Padding: " << u << std::endl;
+
 	// Zero Padding for efficiency
-	for (int i = m_iFFTSize; i < N - m_iFFTSize; i++) {
+	for (int i = m_iFFTSize; i < N; i++) {
 		x[i][REAL] = 0;
 		x[i][IMAG] = 0;
+		u++;
 	}
+
+	std::cout << "Length After Padding: " << u << std::endl;
 
 	// Compute FFT
 	this->fft(x, y);
 
 	// Display the results
-	std::cout << "FFT:" << std::endl;
-	this->displayComplex(y);
+	//std::cout << "FFT:" << std::endl;
+	//this->displayComplex(y);
 
 	// Compute IFFT
-	this->ifft(y, x);
+	//this->ifft(y, x);
 
 	// Display the results
-	std::cout << "\nIFFT:" << std::endl;
-	this->displayReal(x);
-}
+	//std::cout << "\nIFFT:" << std::endl;
+	//this->displayReal(x);
 
-// ---------- RETURN FFT IN VECTOR FORMAT ----------
-std::vector<std::complex<float>> cFastFourierTransform::getFFT()
-{
-	std::vector<std::complex<float>> vfFFT_complex;
 	for (int i = 0; i < N; i++) {
-		vfFFT_complex.push_back((y[i][REAL], y[i][IMAG]));
+		std::complex<float> mycomplex(y[i][REAL], y[i][IMAG]);
+		m_vfFFT_complex.push_back(mycomplex);
+		//std::cout << "\n" << y[i][REAL] << " " << y[i][IMAG] << "i\n" << std::endl;
 	}
 
-	return vfFFT_complex;
+	// Calculate Magnitude and Phase Spectrums
+	this->setMagnitude(m_vfFFT_complex);
+	this->setPhase(m_vfFFT_complex);
 }
 
 // ---------- RETURN IFFT IN VECTOR FORMAT ----------
 
 // ---------- RETURN MAGNITUDE RESPONSE ----------
-std::vector<float> cFastFourierTransform::getMagnitude(std::vector<std::complex<float>>& vfFFT_complex)
+std::vector<float> cFastFourierTransform::getMagnitude()
 {
-	std::vector<float> vfMagnitude;
-	for (int i = 0; i < vfFFT_complex.size(); i++) {
-		float real = vfFFT_complex.at(i).real();
-		float imag = vfFFT_complex.at(i).imag();
-		float mag = real * real + imag * imag;
-		vfMagnitude.push_back(mag);
-	}
-
-	return vfMagnitude;
+	return m_vfMagnitude;
 }
 
 // ---------- RETURN PHASE RESPONSE ----------
-std::vector<float> cFastFourierTransform::getPhase(std::vector<std::complex<float>>& vfFFT_complex)
+std::vector<float> cFastFourierTransform::getPhase()
 {
-	std::vector<float> vfPhase;
+	return m_vfPhase;
+}
+
+// ---------- COMPUTE MAGNITUDE SPECTRUM ----------
+void cFastFourierTransform::setMagnitude(std::vector<std::complex<float>>& vfFFT_complex)
+{
+	m_vfMagnitude.clear();
+	for (int i = 0; i < vfFFT_complex.size() / 2; i++) {
+		float mag = abs(vfFFT_complex.at(i)) / (float)N;
+		m_vfMagnitude.push_back(2*mag);
+	}
+
+	//m_vfMagnitude = 2 * m_vfMagnitude;
+}
+
+// ---------- COMPUTE PHASE SPECTRUM ----------
+void cFastFourierTransform::setPhase(std::vector<std::complex<float>>& vfFFT_complex)
+{
+	m_vfPhase.clear();
 	for (int i = 0; i < vfFFT_complex.size(); i++) {
 		float real = vfFFT_complex.at(i).real();
 		float imag = vfFFT_complex.at(i).imag();
 		float phase = atan(imag / real);
-		vfPhase.push_back(phase);
+		m_vfPhase.push_back(phase);
 	}
-
-	return vfPhase;
 }
 
 // ---------- COMPUTE 1-D FAST FOURIER TRANSFORM ----------
