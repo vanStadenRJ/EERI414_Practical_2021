@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cFastFourierTransform.cpp" />
+    <ClCompile Include="cFilterDesign.cpp" />
     <ClCompile Include="ChebyshevFilterGenerator.cpp" />
     <ClCompile Include="cSignalGenerator.cpp" />
   </ItemGroup>
@@ -162,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cFastFourierTransform.h" />
+    <ClInclude Include="cFilterDesign.h" />
     <ClInclude Include="cSignalGenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

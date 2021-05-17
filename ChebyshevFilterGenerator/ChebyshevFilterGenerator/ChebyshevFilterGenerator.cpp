@@ -38,6 +38,7 @@
 #include "imgui_impl_opengl3.h"
 #include "cSignalGenerator.h"
 #include "cFastFourierTransform.h"
+#include "cFilterDesign.h"
 
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error: %d: %s\n", error, description);
@@ -51,11 +52,19 @@ std::vector<float> plotFFT(bool bComponent, std::vector<float> &vfTime);
 // GLOBAL VARIABLE DECLERATIONS
 std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>();
 std::shared_ptr<cFastFourierTransform> pLocalFFT = std::make_shared<cFastFourierTransform>();
+std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>();
 
 ImVec4 foreground_color = ImVec4(0.258, 0.529, 0.561, 1);
 
 int main(int argc, char* argv[])
 {
+    int iOmegaPass_Hz = 3600;			
+    int iOmegaStop_Hz = 7000;			
+    int iRipplePass = -1;				
+    int iRippleStop = -30;				
+    std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop);
+
+
     // ---------- GLFW ERROR STATE ----------
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
