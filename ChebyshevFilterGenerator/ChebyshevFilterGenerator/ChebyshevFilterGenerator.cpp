@@ -61,8 +61,9 @@ int main(int argc, char* argv[])
     int iOmegaPass_Hz = 500;			
     int iOmegaStop_Hz = 1000;			
     int iRipplePass = -1;				
-    int iRippleStop = -30;				
-    std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop);
+    int iRippleStop = -30;	
+    int iSampleRate = 5000;
+    std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop, iSampleRate);
 
 
     // ---------- GLFW ERROR STATE ----------

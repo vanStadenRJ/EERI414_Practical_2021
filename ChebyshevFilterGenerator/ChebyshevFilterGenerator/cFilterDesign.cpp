@@ -34,13 +34,14 @@ cFilterDesign::cFilterDesign() :
 	// DEFAULT CONSTRUCTOR
 }
 
-cFilterDesign::cFilterDesign(int& iOmegaPass_Hz, int& iOmegaStop_Hz, int& iRipplePass_dB, int& iRippleStop_dB)
+cFilterDesign::cFilterDesign(int& iOmegaPass_Hz, int& iOmegaStop_Hz, int& iRipplePass_dB, int& iRippleStop_dB, int& iSampleRate_Hz)
 {
 	// Set filter design paramters based on Input variables
 	m_fOmegaPass_rads = iOmegaPass_Hz * 2 * M_PI;
 	m_fOmegaStop_rads = iOmegaStop_Hz * 2 * M_PI;
 	m_fRipplePass_ratio = pow(10, (double)iRipplePass_dB / (double)20);
 	m_fRippleStop_ratio = pow(10, (double)iRippleStop_dB / (double)20);
+	m_iSampleRate_Hz = iSampleRate_Hz;
 
 	// Calculate the Analog Transfer Function
 	this->setAnalogFilterTF();
@@ -56,7 +57,7 @@ void cFilterDesign::setAnalogFilterTF()
 	std::cout << "Order: " << m_iOrder_N << std::endl;
 
 	// Calculate the Minor and Major Axis
-	double fEpsilon = sqrt(1 / pow(m_fRipplePass_ratio, 2) - 1);
+	fEpsilon = sqrt(1 / pow(m_fRipplePass_ratio, 2) - 1);
 	std::cout << "Epsilon: " << fEpsilon << std::endl;
 	double fUnit = pow(fEpsilon, -1) + sqrt(1 + pow(fEpsilon, -2));
 	double fMinorAxis = m_fOmegaPass_rads * ((pow(fUnit, (double)1 / (double)m_iOrder_N) - pow(fUnit, (double)-1 / (double)m_iOrder_N)) / (double)2);
@@ -137,8 +138,53 @@ void cFilterDesign::printPoly(std::vector<double>& vfPolynomial)
 		std::cout << vfPolynomial.at(i);			
 		if (i != n - 1) {			
 			std::cout << "s^" << (n - 1 - i);
-			std::cout << " + ";
+			std::cout << " + ";			
 		}
-			
+
+		std::cout << "\t\t\t" << vfPolynomial.at(i) << std::endl;
+
+		std::cout << std::endl;			
+	}
+}
+
+// ---------- Analog Design: T(N) Function ----------
+double cFilterDesign::t_n(double& fFreq)
+{
+	if (abs(fFreq) <= 1) {
+		return cos(m_iOrder_N * acos(fFreq));
+	}
+	else {
+		return cosh(m_iOrder_N * acosh(fFreq));
+	}
+}
+
+// ---------- Determine Analog Magnitude ----------
+void cFilterDesign::setAnalogMagnitude()
+{
+	m_vfMagnitude_s = { };
+	m_vfX_s = { };
+	for (int i = 0; i < m_iSampleRate_Hz; i++) {
+		double fFreq = (i * 2 * M_PI) / m_fOmegaPass_rads;
+		double fMag = 1 / sqrt(1 + pow(fEpsilon, 2) * pow(t_n(fFreq), 2));
+		m_vfX_s.push_back(i);
+		m_vfMagnitude_s.push_back(20 * log10(fMag));
+	}
+}
+
+// ---------- Determine Analog Phase ----------
+void cFilterDesign::setAnalogPhase()
+{
+	m_vfPhase_s = { };
+	for (int i = 0; i < m_iSampleRate_Hz; i++) {
+		std::complex<double> num(m_fNumerator_s, 0);
+		std::complex<double> den(0, 0);
+		
+		double jw = m_iSampleRate_Hz * 2 * M_PI;
+		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
+			den = den + (m_vfDenominator_s.at(i) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+		}
+
+		std::complex<double> val = num / den;
+		m_vfPhase_s.push_back(atan(val.imag() / val.real()));
 	}
 }
