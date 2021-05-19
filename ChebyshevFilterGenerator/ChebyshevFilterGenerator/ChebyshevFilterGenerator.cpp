@@ -58,8 +58,8 @@ ImVec4 foreground_color = ImVec4(0.258, 0.529, 0.561, 1);
 
 int main(int argc, char* argv[])
 {
-    int iOmegaPass_Hz = 3600;			
-    int iOmegaStop_Hz = 7000;			
+    int iOmegaPass_Hz = 500;			
+    int iOmegaStop_Hz = 1000;			
     int iRipplePass = -1;				
     int iRippleStop = -30;				
     std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop);

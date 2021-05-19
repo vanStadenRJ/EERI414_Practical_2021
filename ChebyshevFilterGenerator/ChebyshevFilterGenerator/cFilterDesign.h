@@ -1,6 +1,8 @@
 #pragma once
 // ---------------------------------------------------------------------------
 // SYSTEM INCLUDE FILES
+#include <vector>
+#include <complex>
 
 // ---------------------------------------------------------------------------
 // LIBRARY INCLUDE FILES
@@ -21,19 +23,19 @@ public:
 
 private:
 	// Private Methods
-	void setOrder();
+	void setAnalogFilterTF();
+	std::vector<std::complex<double>> polyMul(std::vector<std::complex<double>> A, std::vector<std::complex<double>> B);
+	void printPoly(std::vector<double>& vfPolynomial);
 
 	// Private Attributes
-	int m_iOmegaPass_Hz;			// Analog Edge Frequency
-	int m_iOmegaStop_Hz;			// Analog Corner Frequency
-	int m_iRipplePass;				// Analog Ripple Passband 
-	int m_iRippleStop;				// Analog Stopband Passband
-	
-	float m_fEps;
-	float m_fEps2;
-	float m_fA2;
-	float m_fk1;
-	float m_fk;
-	float m_fOrder;
+	double m_fOmegaPass_rads;					// Analog Edge Frequency (rad/s)
+	double m_fOmegaStop_rads;					// Analog Corner Frequency (rad/s)
+	double m_fRipplePass_ratio;					// Analog Ripple Passband (ratio)
+	double m_fRippleStop_ratio;					// Analog Ripple Stopband (ratio)
+
+	int m_iOrder_N;								// Order of designed filter
+
+	std::vector<double> m_vfDenominator_s;		// Denominator of Analog Transfer Function
+	std::vector<double> m_vfNumerator_s;		// Numerator of Analog Transfer Function
 };
 

@@ -8,6 +8,7 @@
 // PROJECT NAME         : ChebyshevFilterGenerator           
 // ---------------------------------------------------------------------------
 
+#define _USE_MATH_DEFINES
 
 // ---------------------------------------------------------------------------
 // SYSTEM INCLUDE FILES
@@ -24,59 +25,120 @@
 
 
 // ---------- CONSTRUCTOR CALLS ----------
-cFilterDesign::cFilterDesign():
-	m_iOmegaPass_Hz(0),			
-	m_iOmegaStop_Hz(0),			
-	m_iRipplePass(0),				
-	m_iRippleStop(0),
-	m_fEps(0),
-	m_fEps2(0),
-	m_fA2(0),
-	m_fk1(0),
-	m_fk(0),
-	m_fOrder(0)
+cFilterDesign::cFilterDesign() :
+	m_fOmegaPass_rads(0.0),
+	m_fOmegaStop_rads(0.0),
+	m_fRipplePass_ratio(0.0),
+	m_fRippleStop_ratio(0.0)
 {
 	// DEFAULT CONSTRUCTOR
 }
 
-cFilterDesign::cFilterDesign(int& iOmegaPass_Hz, int& iOmegaStop_Hz, int& iRipplePass_dB, int& iRippleStop_dB):
-	m_fEps(0),
-	m_fEps2(0),
-	m_fA2(0),
-	m_fk1(0),
-	m_fk(0),
-	m_fOrder(0)
+cFilterDesign::cFilterDesign(int& iOmegaPass_Hz, int& iOmegaStop_Hz, int& iRipplePass_dB, int& iRippleStop_dB)
 {
-	// Populate Input Variable
-	m_iOmegaPass_Hz = iOmegaPass_Hz;
-	m_iOmegaStop_Hz = iOmegaStop_Hz;
-	m_iRipplePass = iRipplePass_dB;
-	m_iRippleStop = iRippleStop_dB;
+	// Set filter design paramters based on Input variables
+	m_fOmegaPass_rads = iOmegaPass_Hz * 2 * M_PI;
+	m_fOmegaStop_rads = iOmegaStop_Hz * 2 * M_PI;
+	m_fRipplePass_ratio = pow(10, (double)iRipplePass_dB / (double)20);
+	m_fRippleStop_ratio = pow(10, (double)iRippleStop_dB / (double)20);
 
-	// Set the Order
-	this->setOrder();
+	// Calculate the Analog Transfer Function
+	this->setAnalogFilterTF();
 }
 
-void cFilterDesign::setOrder()
+
+// ---------- CALCULATE ANALOG FILTER CHARACTERISTICS ----------
+void cFilterDesign::setAnalogFilterTF()
 {
-	// Convert dB values to Ratios
-	float fRipplePass_ratio = powf((float)10, (float)m_iRipplePass / (float)10);
-	float fRippleStop_ratio = powf((float)10, (float)m_iRippleStop / (float)10);
+	// Set Order N
+	double fOrder = acosh(sqrt(((1 / pow(m_fRippleStop_ratio, 2)) - 1) / ((1 / pow(m_fRipplePass_ratio, 2)) - 1))) / acosh(m_fOmegaStop_rads / m_fOmegaPass_rads);
+	m_iOrder_N = ceil(fOrder);
+	std::cout << "Order: " << m_iOrder_N << std::endl;
 
-	// Calculate Epsilon^2 and Epsilon
-	std::cout << "Chebyshev Design" << std::endl;
-	m_fEps2 = ((float)1 / fRipplePass_ratio) - 1;
-	std::cout << "Epsilon^2:\t " << m_fEps2 << std::endl;	
-	m_fEps = sqrtf(m_fEps2);
-	std::cout << "Epsilon:\t " << m_fEps << std::endl;
+	// Calculate the Minor and Major Axis
+	double fEpsilon = sqrt(1 / pow(m_fRipplePass_ratio, 2) - 1);
+	std::cout << "Epsilon: " << fEpsilon << std::endl;
+	double fUnit = pow(fEpsilon, -1) + sqrt(1 + pow(fEpsilon, -2));
+	double fMinorAxis = m_fOmegaPass_rads * ((pow(fUnit, (double)1 / (double)m_iOrder_N) - pow(fUnit, (double)-1 / (double)m_iOrder_N)) / (double)2);
+	double fMajorAxis = m_fOmegaPass_rads * ((pow(fUnit, (double)1 / (double)m_iOrder_N) + pow(fUnit, (double)-1 / (double)m_iOrder_N)) / (double)2);
 
-	// Calculate A2
-	m_fA2 = (float)1 / (float)fRippleStop_ratio;
-	std::cout << "A^2:\t\t " << m_fA2 << std::endl;
+	// Determine the Denominator of the Transfer Function
+	std::vector<std::complex<double>> vfDenominator;
+	for (int i = 0; i < m_iOrder_N; i++) {
 
-	// Calculate Order of Filter
-	m_fk = (float)m_iOmegaPass_Hz / (float)m_iOmegaStop_Hz;
-	m_fk1 = m_fEps / sqrtf(m_fA2 - 1);
-	m_fOrder = acoshf((float)1 / m_fk1) / acoshf((float)1 / m_fk);
-	std::cout << "Order (N):\t " << m_fOrder << std::endl;
+		double fPhi = (M_PI / (double)2) + ((((2*i) + 1)*M_PI) / (2*(double)m_iOrder_N));
+		//std::complex<double> fPole((fMinorAxis * cos(fPhi)) / m_fOmegaPass_rads, (fMajorAxis * sin(fPhi)) / m_fOmegaPass_rads);
+		std::complex<double> fPole(fMinorAxis * cos(fPhi), fMajorAxis * sin(fPhi));
+		vfDenominator.push_back(fPole);
+		if (m_iOrder_N % 2 == 0) {
+			fPole = std::complex<double>(fPole.real(), fPole.imag() * -1);
+			vfDenominator.push_back(fPole);
+			i++;
+		}		
+	}
+	std::cout << "======================" << std::endl;
+	for (int i = 0; i < vfDenominator.size(); i++) {
+		std::cout << "Pole " << i << ": " << vfDenominator.at(i) << std::endl;
+	}
+	std::vector<std::complex<double>> vfA{ 1 };
+	for (int i = 0; i < vfDenominator.size(); i++) {
+		vfDenominator[i] = std::complex<double>(vfDenominator[i].real() * -1, vfDenominator[i].imag());
+		std::vector<std::complex<double>> vfB{ vfDenominator.at(i), 1 };
+		vfA = polyMul(vfA, vfB);		
+	}
+	std::cout << std::endl;
+	for (int i = 0; i < vfA.size(); i++) {
+		m_vfDenominator_s.push_back(vfA[vfA.size() - 1 - i].real());
+	}
+	this->printPoly(m_vfDenominator_s);
+	std::cout << "\n======================" << std::endl << std::endl;
+
+	// Determine the Numerator of the Transfer Function
+	std::complex<double> num(1,0);
+	for (int i = 0; i < vfDenominator.size(); i++) {
+		num = num * vfDenominator.at(i);
+	}
+	if (m_iOrder_N % 2 == 0) {
+		num = num / sqrt(1 + pow(fEpsilon, 2));			// If Even order, divide by sqrt (1 + epsilon^2)
+	}
+	std::cout << "Numerator: " << num << std::endl;
+}
+
+// ---------- Multiply Factors of Polynomial ----------
+std::vector<std::complex<double>> cFilterDesign::polyMul(std::vector<std::complex<double>> A, std::vector<std::complex<double>> B)
+{
+	std::vector<std::complex<double>> vfProd;
+	int m = A.size();
+	int n = B.size();
+	// Initialize the porduct polynomial
+	for (int i = 0; i < m + n - 1; i++)
+		vfProd.push_back((0, 0));
+
+	// Multiply two polynomials term by term
+
+	// Take ever term of first polynomial
+	for (int i = 0; i < m; i++)
+	{
+		// Multiply the current term of first polynomial
+		// with every term of second polynomial.
+		for (int j = 0; j < n; j++)
+			vfProd.at(i + j) += A.at(i) * B.at(j);
+	}
+
+	return vfProd;
+}
+
+// ---------- Print a Multiplied Polynomial ----------
+void cFilterDesign::printPoly(std::vector<double>& vfPolynomial)
+{
+	int n = vfPolynomial.size();
+	for (int i = 0; i < n; i++)
+	{
+		std::cout << vfPolynomial.at(i);			
+		if (i != n - 1) {			
+			std::cout << "s^" << (n - 1 - i);
+			std::cout << " + ";
+		}
+			
+	}
 }
