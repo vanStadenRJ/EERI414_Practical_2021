@@ -76,6 +76,7 @@ void cFastFourierTransform::getFFT(std::vector<float>& vfSignal_Time)
 	//std::cout << "\nIFFT:" << std::endl;
 	//this->displayReal(x);
 
+	m_vfFFT_complex.clear();
 	for (int i = 0; i < N; i++) {
 		std::complex<float> mycomplex(y[i][REAL], y[i][IMAG]);
 		m_vfFFT_complex.push_back(mycomplex);

@@ -58,6 +58,7 @@ void cSignalGenerator::generateSignal(int &iSweepType)
 	- Sweep for 0 khz- 30kHz in first 2.5 seconds
 	- Sweep from 30kHz - 0kHz in last 2.5 seconds	
 	*/
+	m_vfSignal_Time = { };
 	float T = (float)m_iSignalLength_ms / (float)1000;
 	float fNrSamples = T * m_iSampleFreq_Hz;
 

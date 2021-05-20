@@ -52,18 +52,12 @@ std::vector<float> plotFFT(bool bComponent, std::vector<float> &vfTime);
 // GLOBAL VARIABLE DECLERATIONS
 std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>();
 std::shared_ptr<cFastFourierTransform> pLocalFFT = std::make_shared<cFastFourierTransform>();
-std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>();
 
 ImVec4 foreground_color = ImVec4(0.258, 0.529, 0.561, 1);
 
 int main(int argc, char* argv[])
 {
-    int iOmegaPass_Hz = 500;			
-    int iOmegaStop_Hz = 1000;			
-    int iRipplePass = -1;				
-    int iRippleStop = -30;	
-    int iSampleRate = 5000;
-    std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop, iSampleRate);
+    //std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop, iSampleRate);
 
 
     // ---------- GLFW ERROR STATE ----------
@@ -99,10 +93,16 @@ int main(int argc, char* argv[])
     bool bMag = true;
 
     // RESET INPUT VARIABLES
-    int iSampleRate_Hz = 75000;
+    //int iSampleRate_Hz = 75000;
+    int iSampleRate_Hz = 5000;
     int iSmallestFreq_Hz = 10;
     int iLargestFreq_Hz = 30000;
     int iSignalLength_ms = 3000;
+
+    int iOmegaPass_Hz = 500;
+    int iOmegaStop_Hz = 1000;
+    int iRipplePass = -1;
+    int iRippleStop = -30;
 
     /*int iSampleRate_Hz = 300;
     int iSmallestFreq_Hz = 10;
@@ -131,6 +131,8 @@ int main(int argc, char* argv[])
         ImGui::Begin("FILTER INPUT PARAMETERS");
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
+
+        ImGuiCond cond_Plot = ImGuiCond_Once;
 
         ImGui::Text("====================================================");        
         ImGui::Text("              INPUT SIGNAL GENERATION               ");
@@ -161,6 +163,8 @@ int main(int argc, char* argv[])
             // PLOT DATA BASED ON INPUT DATA  
             std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>(iSampleRate_Hz, iSignalLength_ms, iSmallestFreq_Hz, iLargestFreq_Hz, 0);
             vfTime = pLocalSignal->getSignal_Time();
+
+            cond_Plot = ImGuiCond_Always;
         } 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 29);
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 122);
@@ -168,6 +172,8 @@ int main(int argc, char* argv[])
             // PLOT DATA BASED ON INPUT DATA  
             std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>(iSampleRate_Hz, iSignalLength_ms, iSmallestFreq_Hz, iLargestFreq_Hz, 1);
             vfTime= pLocalSignal->getSignal_Time();
+
+            cond_Plot = ImGuiCond_Always;
             
         }
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 29);
@@ -175,13 +181,15 @@ int main(int argc, char* argv[])
         if (ImGui::Button("SINE SUM", ImVec2(118, 25))) {
             // PLOT DATA BASED ON INPUT DATA  
             std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>(iSampleRate_Hz, iSignalLength_ms, iSmallestFreq_Hz, iLargestFreq_Hz, 2);
-            vfTime = pLocalSignal->getSignal_Time();            
+            vfTime = pLocalSignal->getSignal_Time();   
+
+            cond_Plot = ImGuiCond_Always;
         }
-        vfTop = vfTime;
+        
 
         ImGui::Text("\n");
         ImGui::Text("====================================================");
-        ImGui::Text("----------- DISPLAY FREQUENCY COMPONENTS -----------");
+        ImGui::Text("            DISPLAY FREQUENCY COMPONENTS            ");
         ImGui::Text("====================================================");
 
         if (ImGui::Button("MAGNITUDE", ImVec2(179, 25))) {
@@ -192,6 +200,8 @@ int main(int argc, char* argv[])
                 vfTest.push_back(sin(i + 1));
             }
             vfFreq = plotFFT(true, vfTest);*/
+
+            cond_Plot = ImGuiCond_Always;
         }
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 29);
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 183);
@@ -203,12 +213,61 @@ int main(int argc, char* argv[])
                 vfTest.push_back(sin(i + 1));
             }
             vfFreq = plotFFT(false, vfTest);*/
+
+            cond_Plot = ImGuiCond_Always;
         }
+        
+
+        ImGui::Text("\n");
+        ImGui::Text("====================================================");
+        ImGui::Text("                ANALOG FILTER DESIGN                ");
+        ImGui::Text("====================================================");
+
+        // INPUT PASSBAND EDGE FREQUENCY
+        ImGui::Text("Passband Edge Frequency");
+        HelpMarker("Set the Passband Edge Frequency (Hz)");
+        ImGui::InputInt("Hz##PassbandEdge", &iOmegaStop_Hz, 1, 10);
+        ImGui::Text("\n");
+        
+        // INPUT STOPBAND EDGE FREQUENCY
+        ImGui::Text("Stopband Edge Frequency");
+        HelpMarker("Set the Stopband Edge Frequency (Hz)");
+        ImGui::InputInt("Hz##StopbandEdge", &iOmegaPass_Hz, 1, 10);
+        ImGui::Text("\n");
+
+        // INPUT PASSBAND RIPPLE
+        ImGui::Text("Passband Ripple");
+        HelpMarker("Set the Passband Ripple (dB)");
+        ImGui::InputInt("dB##PassbandRipple", &iRipplePass, 1, 10);
+        ImGui::Text("\n");
+
+        // INPUT STOPBAND RIPPLE
+        ImGui::Text("Stopband Ripple");
+        HelpMarker("Set the Stopband Ripple (dB)");
+        ImGui::InputInt("dB##StopbandRipple", &iRippleStop, 1, 10);
+        ImGui::Text("\n");
+
+        if (ImGui::Button("ANALOG", ImVec2(179, 25))) {
+            std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop, iSampleRate_Hz);            
+            vfTime = pLocalFilter->getYAxis(true, true);
+            vfFreq = pLocalFilter->getYAxis(true, false);
+
+            cond_Plot = ImGuiCond_Always;
+        }
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 29);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 183);
+        if (ImGui::Button("DIGITAL", ImVec2(179, 25))) {
+
+
+            cond_Plot = ImGuiCond_Always;
+        }
+
+        vfTop = vfTime;
         vfBottom = vfFreq;
-        ImGuiCond cond_Plot = ImGuiCond_Always;
-        test_PlotData(vfTop, vfBottom,  cond_Plot);
+        test_PlotData(vfTop, vfBottom, cond_Plot);
         vfTop.clear();
         vfBottom.clear();
+
         ImGui::End();        
 
         // =======================
@@ -242,7 +301,7 @@ int main(int argc, char* argv[])
 
 void test_PlotData(std::vector<float> &vsPlotData_top, std::vector<float> &vsPlotData_bottom, ImGuiCond &plotCondition)
 {
-    //ImGuiCond condPlot = plotCondition;
+    ImGuiCond condPlot = plotCondition;
     ImGui::SetNextWindowPos(ImVec2(420, 20));
     ImGui::SetNextWindowSize(ImVec2(1480, 977));
     ImGui::Begin("SIGNAL OUTPUT");
@@ -251,8 +310,16 @@ void test_PlotData(std::vector<float> &vsPlotData_top, std::vector<float> &vsPlo
     if (vsPlotData_top.size() != 0) {
         // START PLOT INSTANCE
         //ImGui::SetCursorPosY(50);
-        ImPlot::SetNextPlotLimitsX(0, vsPlotData_top.size() + 10);
-        ImPlot::SetNextPlotLimitsY(*std::min_element(vsPlotData_top.begin(), vsPlotData_top.end()) - 0.5, *std::max_element(vsPlotData_top.begin(), vsPlotData_top.end()) + 0.5);
+        ImPlot::SetNextPlotLimitsX(0, vsPlotData_top.size() + 10, plotCondition);
+        double min = 999999;
+        double max = -999999;
+        for (int i = 1; i < vsPlotData_top.size(); i++) {
+            if (vsPlotData_top.at(i) > max)
+                max = vsPlotData_top.at(i);
+            if (vsPlotData_top.at(i) < min && vsPlotData_top.at(i) > -50)
+                min = vsPlotData_top.at(i);
+        }
+        ImPlot::SetNextPlotLimitsY(min - 0.5, max + 0.5, plotCondition);
         ImPlot::BeginPlot("PLOT OF SINE WAVE", "Y AXIS", "X AXIS", ImVec2(ImGui::GetWindowWidth() - 18, ImGui::GetWindowHeight()/2 - 10));
 
         float* dat_y = new float[vsPlotData_top.size()];
@@ -272,8 +339,16 @@ void test_PlotData(std::vector<float> &vsPlotData_top, std::vector<float> &vsPlo
     if (vsPlotData_bottom.size() != 0) {
         // START PLOT INSTANCE
         //ImGui::SetCursorPosY(50);
-        ImPlot::SetNextPlotLimitsX(0, vsPlotData_bottom.size() + 10);
-        ImPlot::SetNextPlotLimitsY(*std::min_element(vsPlotData_bottom.begin(), vsPlotData_bottom.end()), *std::max_element(vsPlotData_bottom.begin(), vsPlotData_bottom.end()));
+        ImPlot::SetNextPlotLimitsX(0, vsPlotData_bottom.size() + 10, plotCondition);
+        double min = 999999;
+        double max = -999999;        
+        for (int i = 1; i < vsPlotData_bottom.size(); i++) {
+            if (vsPlotData_bottom.at(i) > max)
+                max = vsPlotData_bottom.at(i);
+            if (vsPlotData_bottom.at(i) < min)
+                min = vsPlotData_bottom.at(i);
+        }        
+        ImPlot::SetNextPlotLimitsY(min - 0.5, max + 0.5, plotCondition);
         ImPlot::BeginPlot("PLOT OF FREQUENCY COMPONENTS", "Y AXIS", "X AXIS", ImVec2(ImGui::GetWindowWidth() - 18, ImGui::GetWindowHeight() / 2 - 10));
 
         float* dat_y = new float[vsPlotData_bottom.size()];

@@ -56,11 +56,9 @@ void cFilterDesign::setAnalogFilterTF()
 	// Set Order N
 	double fOrder = acosh(sqrt(((1 / pow(m_fRippleStop_ratio, 2)) - 1) / ((1 / pow(m_fRipplePass_ratio, 2)) - 1))) / acosh(m_fOmegaStop_rads / m_fOmegaPass_rads);
 	m_iOrder_N = ceil(fOrder);
-	std::cout << "Order: " << m_iOrder_N << std::endl;
 
 	// Calculate the Minor and Major Axis
 	fEpsilon = sqrt(1 / pow(m_fRipplePass_ratio, 2) - 1);
-	std::cout << "Epsilon: " << fEpsilon << std::endl;
 	double fUnit = pow(fEpsilon, -1) + sqrt(1 + pow(fEpsilon, -2));
 	double fMinorAxis = m_fOmegaPass_rads * ((pow(fUnit, (double)1 / (double)m_iOrder_N) - pow(fUnit, (double)-1 / (double)m_iOrder_N)) / (double)2);
 	double fMajorAxis = m_fOmegaPass_rads * ((pow(fUnit, (double)1 / (double)m_iOrder_N) + pow(fUnit, (double)-1 / (double)m_iOrder_N)) / (double)2);
@@ -70,8 +68,8 @@ void cFilterDesign::setAnalogFilterTF()
 	for (int i = 0; i < m_iOrder_N; i++) {
 
 		double fPhi = (M_PI / (double)2) + ((((2*i) + 1)*M_PI) / (2*(double)m_iOrder_N));
-		//std::complex<double> fPole((fMinorAxis * cos(fPhi)) / m_fOmegaPass_rads, (fMajorAxis * sin(fPhi)) / m_fOmegaPass_rads);
-		std::complex<double> fPole((fMinorAxis * cos(fPhi)), (fMajorAxis * sin(fPhi)));
+		std::complex<double> fPole((fMinorAxis * cos(fPhi)) / m_fOmegaPass_rads, (fMajorAxis * sin(fPhi)) / m_fOmegaPass_rads);
+		//std::complex<double> fPole((fMinorAxis * cos(fPhi)), (fMajorAxis * sin(fPhi)));
 		vfDenominator.push_back(fPole);
 		if (m_iOrder_N % 2 == 0) {
 			fPole = std::complex<double>(fPole.real(), fPole.imag() * -1);
@@ -79,7 +77,9 @@ void cFilterDesign::setAnalogFilterTF()
 			i++;
 		}		
 	}
-	std::cout << "======================" << std::endl;
+	std::cout << "=======================" << std::endl;
+	std::cout << "LOW PASS FILTER DESIGN:" << std::endl;
+	std::cout << "=======================" << std::endl;
 	for (int i = 0; i < vfDenominator.size(); i++) {
 		std::cout << "Pole " << i << ": " << vfDenominator.at(i) << std::endl;
 	}
@@ -92,9 +92,7 @@ void cFilterDesign::setAnalogFilterTF()
 	std::cout << std::endl;
 	for (int i = 0; i < vfA.size(); i++) {
 		m_vfDenominator_s.push_back(vfA[vfA.size() - 1 - i].real());
-	}
-	this->printPoly(m_vfDenominator_s);
-	std::cout << "\n======================" << std::endl << std::endl;
+	}	
 
 	// Determine the Numerator of the Transfer Function
 	std::complex<double> num(1,0);
@@ -105,7 +103,17 @@ void cFilterDesign::setAnalogFilterTF()
 		num = num / sqrt(1 + pow(fEpsilon, 2));			// If Even order, divide by sqrt (1 + epsilon^2)
 	}
 	m_fNumerator_s = num.real();
-	std::cout << "Numerator: " << num << std::endl;
+
+	// Display LP Transfer Function
+	std::cout << "\t\t\t" << m_fNumerator_s << std::endl;
+	std::cout << "------------------------------------------------------------------" << std::endl;
+	this->printPoly(m_vfDenominator_s);
+
+	std::cout << "\n======================" << std::endl << std::endl;
+
+	// Transform the LP Transfer Function to a HP Transfer Function
+
+
 }
 
 // ---------- Multiply Factors of Polynomial ----------
@@ -142,12 +150,9 @@ void cFilterDesign::printPoly(std::vector<double>& vfPolynomial)
 		if (i != n - 1) {			
 			std::cout << "s^" << (n - 1 - i);
 			std::cout << " + ";			
-		}
-
-		std::cout << "\t\t\t" << vfPolynomial.at(i) << std::endl;
-
-		std::cout << std::endl;			
+		}		
 	}
+	std::cout << std::endl;
 }
 
 // ---------- Analog Design: T(N) Function ----------
@@ -169,22 +174,26 @@ void cFilterDesign::setAnalogMagnitude()
 	m_vfX_s = { };
 	for (int i = 0; i < m_iSampleRate_Hz; i++) {
 		// Using Forumla
-		double fFreq = (i * 2 * M_PI) / m_fOmegaPass_rads;
+		/*double fFreq = (i * 2 * M_PI) / m_fOmegaPass_rads;
 		double fMag = 1 / sqrt(1 + pow(fEpsilon, 2) * pow(t_n(fFreq), 2));
 		m_vfX_s.push_back(i);
-		m_vfMagnitude_s.push_back(20 * log10(fMag));		
+		m_vfMagnitude_s.push_back(20 * log10(fMag));*/		
 
 		// Sweeping through possible frequencies
-		/*std::complex<double> num(m_fNumerator_s, 0);
+		std::complex<double> num(m_fNumerator_s, 0);
 		std::complex<double> den(0, 0);
 
-		double jw = i * 2 * M_PI;
+		//double jw = i * 2 * M_PI;
+		double jw = (i * 2 * M_PI) / m_fOmegaPass_rads;
 		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
-			den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+			//std::complex<double> val = (m_fOmegaPass_rads * m_fOmegaStop_rads) / std::complex<double>(0, jw);
+			std::complex<double> val = std::complex<double>((m_fOmegaStop_rads) / (m_fOmegaPass_rads), 0) / std::complex<double>(0, jw);
+			//den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+			den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
 		}		
 
 		std::complex<double> val = num / den;
-		m_vfMagnitude_s.push_back(20 * log10(abs(val)));*/
+		m_vfMagnitude_s.push_back(20 * log10(abs(val)));
 	}
 }
 
@@ -192,20 +201,77 @@ void cFilterDesign::setAnalogMagnitude()
 void cFilterDesign::setAnalogPhase()
 {
 	m_vfPhase_s = { };
+	m_vfTransferFunction_s = { };
 	for (int i = 0; i < m_iSampleRate_Hz; i++) {
 		std::complex<double> num(m_fNumerator_s, 0);
 		std::complex<double> den(0, 0);
 		
-		double jw = i * 2 * M_PI;
+		//double jw = i * 2 * M_PI;
+		double jw = (i * 2 * M_PI) / m_fOmegaPass_rads;
 		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
-			den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+			//std::complex<double> val = (m_fOmegaPass_rads * m_fOmegaStop_rads) / std::complex<double>(0, jw);
+			std::complex<double> val = std::complex<double>((m_fOmegaStop_rads) / (m_fOmegaPass_rads), 0) / std::complex<double>(0, jw);
+			//den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+			den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
 		}
 
 		std::complex<double> val = num / den;
+		m_vfTransferFunction_s.push_back(val);
 		m_vfPhase_s.push_back(atan(val.imag() / val.real()));
 
 		/*if (i < 1000) {
 			std::cout << i << ":\t" << m_vfMagnitude_s.at(i) << "\t" << m_vfPhase_s.at(i) << std::endl;
 		}*/
+	}
+}
+
+// ---------- Determine Analog Phase ----------
+std::vector<std::complex<double>> cFilterDesign::getTransferFunction(bool bAnalog)
+{
+	if (bAnalog == true) {
+		// Return Analog Transfer Function
+		return m_vfTransferFunction_s;
+	}
+	else {
+		// Return Digital Transfer Function
+		//return m_vfTransferFunction_z;
+	}	
+}
+
+// ---------- Determine Analog Phase ----------
+std::vector<float> cFilterDesign::getYAxis(bool bAnalog, bool bMag)
+{
+	if (bAnalog == true) {
+		// Return Analog Magnitude / Phase
+		if (bMag == true) {
+			// Return Magnitude Spectrum
+			return m_vfMagnitude_s;
+		}
+		else {
+			return m_vfPhase_s;
+		}
+	}
+	else {
+		// Return Digital Magnitude / Phase
+		if (bMag == true) {
+			// Return Magnitude Spectrum
+			//return m_vfMagnitude_z;
+		}
+		else {
+			//return m_vfPhase_z;
+		}
+	}
+}
+
+// ---------- Determine Analog Phase ----------
+std::vector<float> cFilterDesign::getXAxis(bool bAnalog)
+{
+	if (bAnalog == true) {
+		// Return Analog x-axis
+		return m_vfX_s;
+	}
+	else {
+		// Return Digital x-axis
+		// return m_vfX_z;
 	}
 }
