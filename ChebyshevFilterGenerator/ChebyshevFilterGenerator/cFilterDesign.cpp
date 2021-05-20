@@ -45,6 +45,8 @@ cFilterDesign::cFilterDesign(int& iOmegaPass_Hz, int& iOmegaStop_Hz, int& iRippl
 
 	// Calculate the Analog Transfer Function
 	this->setAnalogFilterTF();
+	this->setAnalogMagnitude();
+	this->setAnalogPhase();
 }
 
 
@@ -69,7 +71,7 @@ void cFilterDesign::setAnalogFilterTF()
 
 		double fPhi = (M_PI / (double)2) + ((((2*i) + 1)*M_PI) / (2*(double)m_iOrder_N));
 		//std::complex<double> fPole((fMinorAxis * cos(fPhi)) / m_fOmegaPass_rads, (fMajorAxis * sin(fPhi)) / m_fOmegaPass_rads);
-		std::complex<double> fPole(fMinorAxis * cos(fPhi), fMajorAxis * sin(fPhi));
+		std::complex<double> fPole((fMinorAxis * cos(fPhi)), (fMajorAxis * sin(fPhi)));
 		vfDenominator.push_back(fPole);
 		if (m_iOrder_N % 2 == 0) {
 			fPole = std::complex<double>(fPole.real(), fPole.imag() * -1);
@@ -102,6 +104,7 @@ void cFilterDesign::setAnalogFilterTF()
 	if (m_iOrder_N % 2 == 0) {
 		num = num / sqrt(1 + pow(fEpsilon, 2));			// If Even order, divide by sqrt (1 + epsilon^2)
 	}
+	m_fNumerator_s = num.real();
 	std::cout << "Numerator: " << num << std::endl;
 }
 
@@ -162,12 +165,26 @@ double cFilterDesign::t_n(double& fFreq)
 void cFilterDesign::setAnalogMagnitude()
 {
 	m_vfMagnitude_s = { };
+	//m_vfPhase_s = { };
 	m_vfX_s = { };
 	for (int i = 0; i < m_iSampleRate_Hz; i++) {
+		// Using Forumla
 		double fFreq = (i * 2 * M_PI) / m_fOmegaPass_rads;
 		double fMag = 1 / sqrt(1 + pow(fEpsilon, 2) * pow(t_n(fFreq), 2));
 		m_vfX_s.push_back(i);
-		m_vfMagnitude_s.push_back(20 * log10(fMag));
+		m_vfMagnitude_s.push_back(20 * log10(fMag));		
+
+		// Sweeping through possible frequencies
+		/*std::complex<double> num(m_fNumerator_s, 0);
+		std::complex<double> den(0, 0);
+
+		double jw = i * 2 * M_PI;
+		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
+			den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+		}		
+
+		std::complex<double> val = num / den;
+		m_vfMagnitude_s.push_back(20 * log10(abs(val)));*/
 	}
 }
 
@@ -179,12 +196,16 @@ void cFilterDesign::setAnalogPhase()
 		std::complex<double> num(m_fNumerator_s, 0);
 		std::complex<double> den(0, 0);
 		
-		double jw = m_iSampleRate_Hz * 2 * M_PI;
+		double jw = i * 2 * M_PI;
 		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
-			den = den + (m_vfDenominator_s.at(i) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+			den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
 		}
 
 		std::complex<double> val = num / den;
 		m_vfPhase_s.push_back(atan(val.imag() / val.real()));
+
+		/*if (i < 1000) {
+			std::cout << i << ":\t" << m_vfMagnitude_s.at(i) << "\t" << m_vfPhase_s.at(i) << std::endl;
+		}*/
 	}
 }
