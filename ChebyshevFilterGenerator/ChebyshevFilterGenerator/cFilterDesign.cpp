@@ -37,11 +37,20 @@ cFilterDesign::cFilterDesign() :
 cFilterDesign::cFilterDesign(int& iOmegaPass_Hz, int& iOmegaStop_Hz, int& iRipplePass_dB, int& iRippleStop_dB, int& iSampleRate_Hz)
 {
 	// Set filter design paramters based on Input variables
-	m_fOmegaPass_rads = iOmegaPass_Hz * 2 * M_PI;
-	m_fOmegaStop_rads = iOmegaStop_Hz * 2 * M_PI;
-	m_fRipplePass_ratio = pow(10, (double)iRipplePass_dB / (double)20);
-	m_fRippleStop_ratio = pow(10, (double)iRippleStop_dB / (double)20);
 	m_iSampleRate_Hz = iSampleRate_Hz;
+	m_fDiscretePass_rads = (double)(iOmegaPass_Hz * 2 * M_PI) / (double)(m_iSampleRate_Hz);
+	m_fDiscreteStop_rads = (double)(iOmegaStop_Hz * 2 * M_PI) / (double)(m_iSampleRate_Hz);
+	m_fRipplePass_ratio = pow(10, (double)iRipplePass_dB / (double)20);
+	m_fRippleStop_ratio = pow(10, (double)iRippleStop_dB / (double)20);	
+
+	// Transform the Discrete Cut Off Frequencies to the Analog Domain
+	m_fOmegaPass_rads = (tan(m_fDiscretePass_rads / (double)2)) * ((double)m_iSampleRate_Hz);
+	m_fOmegaStop_rads = (tan(m_fDiscreteStop_rads / (double)2)) * ((double)m_iSampleRate_Hz);
+	
+	std::cout << "Discrete Pass Freq (rad/s): " << m_fDiscretePass_rads << std::endl;
+	std::cout << "Discrete Stop Freq (rad/s): " << m_fDiscreteStop_rads << std::endl;
+	std::cout << "Analog Pass Freq (Hz):      " << m_fOmegaPass_rads << std::endl;
+	std::cout << "Analog Stop Freq (Hz):      " << m_fOmegaStop_rads << std::endl;
 
 	// Calculate the Analog Transfer Function
 	this->setAnalogFilterTF();
@@ -194,6 +203,7 @@ void cFilterDesign::setAnalogMagnitude()
 
 		std::complex<double> val = num / den;
 		m_vfMagnitude_s.push_back(20 * log10(abs(val)));
+		m_vfX_s.push_back(jw);
 	}
 }
 

@@ -34,6 +34,8 @@ private:
 	double t_n(double& fFreq);
 
 	// Private Attributes
+	double m_fDiscretePass_rads;									// Discrete Edge Frequency (rad/s)
+	double m_fDiscreteStop_rads;									// Discrete Corner Frequency (rad/s)
 	double m_fOmegaPass_rads;										// Analog Edge Frequency (rad/s)
 	double m_fOmegaStop_rads;										// Analog Corner Frequency (rad/s)
 	double m_fRipplePass_ratio;										// Analog Ripple Passband (ratio)
