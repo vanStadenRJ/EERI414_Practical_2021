@@ -101,8 +101,8 @@ int main(int argc, char* argv[])
 
     int iOmegaPass_Hz = 500;
     int iOmegaStop_Hz = 1000;
-    int iRipplePass = -1;
-    int iRippleStop = -30;
+    double iRipplePass = -1;
+    double iRippleStop = -30;
 
     /*int iSampleRate_Hz = 300;
     int iSmallestFreq_Hz = 10;
@@ -238,13 +238,13 @@ int main(int argc, char* argv[])
         // INPUT PASSBAND RIPPLE
         ImGui::Text("Passband Ripple");
         HelpMarker("Set the Passband Ripple (dB)");
-        ImGui::InputInt("dB##PassbandRipple", &iRipplePass, 1, 10);
+        ImGui::InputDouble("dB##PassbandRipple", &iRipplePass, 1, 10);
         ImGui::Text("\n");
 
         // INPUT STOPBAND RIPPLE
         ImGui::Text("Stopband Ripple");
         HelpMarker("Set the Stopband Ripple (dB)");
-        ImGui::InputInt("dB##StopbandRipple", &iRippleStop, 1, 10);
+        ImGui::InputDouble("dB##StopbandRipple", &iRippleStop, 1, 10);
         ImGui::Text("\n");
 
         if (ImGui::Button("ANALOG", ImVec2(179, 25))) {
@@ -257,7 +257,9 @@ int main(int argc, char* argv[])
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 29);
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 183);
         if (ImGui::Button("DIGITAL", ImVec2(179, 25))) {
-
+            std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop, iSampleRate_Hz);
+            vfTime = pLocalFilter->getYAxis(false, true);
+            vfFreq = pLocalFilter->getYAxis(false, false);
 
             cond_Plot = ImGuiCond_Always;
         }

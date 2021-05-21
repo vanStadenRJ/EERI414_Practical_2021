@@ -15,7 +15,7 @@ class cFilterDesign
 public:
 	// Constructors
 	cFilterDesign();
-	cFilterDesign(int &iOmegaPass_Hz, int &iOmegaStop_Hz, int &iRipplePass_dB, int &iRippleStop_dB, int &iSampleRate_Hz);
+	cFilterDesign(int &iOmegaPass_Hz, int &iOmegaStop_Hz, double &iRipplePass_dB, double &iRippleStop_dB, int &iSampleRate_Hz);
 
 	// Public Methods
 	std::vector<std::complex<double>> getTransferFunction(bool bAnalog);
@@ -29,6 +29,8 @@ private:
 	void setAnalogFilterTF();
 	void setAnalogMagnitude();
 	void setAnalogPhase();
+	void setDigitalMagnitude();
+	void setDigitalPhase();
 	std::vector<std::complex<double>> polyMul(std::vector<std::complex<double>> A, std::vector<std::complex<double>> B);
 	void printPoly(std::vector<double>& vfPolynomial);
 	double t_n(double& fFreq);
@@ -48,9 +50,12 @@ private:
 
 	std::vector<std::complex<double>> m_vfTransferFunction_s;		// Transfer Function vector of Analog Filter
 	std::vector<double> m_vfDenominator_s;							// Denominator of Analog Transfer Function
-	std::vector<float> m_vfMagnitude_s;							// Analog Filter Magnitude Response	
-	std::vector<float> m_vfPhase_s;								// Analog Filter Phase Response
-	std::vector<float> m_vfX_s;									// X-axis of the Analog Magnitude
+	std::vector<float> m_vfMagnitude_s;								// Analog Filter Magnitude Response	
+	std::vector<float> m_vfMagnitude_z;								// Digital Filter Magnitude Response	
+	std::vector<float> m_vfPhase_s;									// Analog Filter Phase Response
+	std::vector<float> m_vfPhase_z;									// Digital Filter Phase Response
+	std::vector<float> m_vfX_s;										// X-axis of the Analog Magnitude	
+	std::vector<float> m_vfX_z;										// X-axis of the Digital Magnitude
 	
 };
 
