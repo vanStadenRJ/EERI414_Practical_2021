@@ -202,10 +202,10 @@ void cFilterDesign::setAnalogMagnitude()
 			//std::complex<double> val = (m_fOmegaPass_rads * m_fOmegaStop_rads) / std::complex<double>(0, jw);
 
 			std::complex<double> s = std::complex<double>(0, jw);
-			std::complex<double> val = std::complex<double>((m_fOmegaStop_rads) / (m_fOmegaPass_rads), 0) / s;
+			std::complex<double> val = std::complex<double>(m_fOmegaStop_rads * m_fOmegaPass_rads, 0) / s;
 
-			den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
-			//den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
+			//den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+			den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
 		}		
 
 		std::complex<double> val = num / den;
@@ -238,10 +238,10 @@ void cFilterDesign::setDigitalMagnitude()
 
 			std::complex<double> ejw = exp(std::complex<double>(0, jw));
 			std::complex<double> s = (ejw - std::complex<double>(1, 0)) / (ejw + std::complex<double>(1, 0));
-			//std::complex<double> val = std::complex<double>((m_fOmegaStop_rads) / (m_fOmegaPass_rads), 0) / s;
+			std::complex<double> val = std::complex<double>(m_fOmegaStop_rads * m_fOmegaPass_rads, 0) / s;
 
-			den = den + (m_vfDenominator_s.at(j) * pow(s, m_vfDenominator_s.size() - 1 - j));
-			//den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
+			//den = den + (m_vfDenominator_s.at(j) * pow(s, m_vfDenominator_s.size() - 1 - j));
+			den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
 		}
 
 		std::complex<double> val = num / den;
@@ -267,10 +267,10 @@ void cFilterDesign::setAnalogPhase()
 			//std::complex<double> val = (m_fOmegaPass_rads * m_fOmegaStop_rads) / std::complex<double>(0, jw);
 
 			std::complex<double> s = std::complex<double>(0, jw);
-			std::complex<double> val = std::complex<double>((m_fOmegaStop_rads) / (m_fOmegaPass_rads), 0) / s;
+			std::complex<double> val = std::complex<double>(m_fOmegaStop_rads * m_fOmegaPass_rads, 0) / s;
 
-			den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
-			//den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
+			//den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+			den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
 		}
 
 		std::complex<double> val = num / den;
@@ -301,10 +301,10 @@ void cFilterDesign::setDigitalPhase()
 
 			std::complex<double> ejw = exp(std::complex<double>(0, jw));
 			std::complex<double> s = (ejw - std::complex<double>(1, 0)) / (ejw + std::complex<double>(1, 0));
-			//std::complex<double> val = std::complex<double>((m_fOmegaStop_rads) / (m_fOmegaPass_rads), 0) / s;
+			std::complex<double> val = std::complex<double>(m_fOmegaStop_rads * m_fOmegaPass_rads, 0) / s;
 
-			den = den + (m_vfDenominator_s.at(j) * pow(s, m_vfDenominator_s.size() - 1 - j));
-			//den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
+			//den = den + (m_vfDenominator_s.at(j) * pow(s, m_vfDenominator_s.size() - 1 - j));
+			den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
 		}
 
 		std::complex<double> val = num / den;

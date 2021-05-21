@@ -94,15 +94,15 @@ int main(int argc, char* argv[])
 
     // RESET INPUT VARIABLES
     //int iSampleRate_Hz = 75000;
-    int iSampleRate_Hz = 5000;
+    int iSampleRate_Hz = 2000;
     int iSmallestFreq_Hz = 10;
     int iLargestFreq_Hz = 30000;
     int iSignalLength_ms = 3000;
 
     int iOmegaPass_Hz = 500;
-    int iOmegaStop_Hz = 1000;
+    int iOmegaStop_Hz = 700;
     double iRipplePass = -1;
-    double iRippleStop = -30;
+    double iRippleStop = -32;
 
     /*int iSampleRate_Hz = 300;
     int iSmallestFreq_Hz = 10;
