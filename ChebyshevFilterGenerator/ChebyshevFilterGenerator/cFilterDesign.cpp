@@ -185,7 +185,7 @@ void cFilterDesign::setAnalogMagnitude()
 	m_vfMagnitude_s = { };
 	//m_vfPhase_s = { };
 	m_vfX_s = { };
-	for (int i = 0; i < m_iSampleRate_Hz / 2; i++) {
+	for (int i = 0; i < m_iSampleRate_Hz; i++) {
 		// Using Forumla
 		/*double fFreq = (i * 2 * M_PI) / m_fOmegaPass_rads;
 		double fMag = 1 / sqrt(1 + pow(fEpsilon, 2) * pow(t_n(fFreq), 2));
@@ -197,7 +197,7 @@ void cFilterDesign::setAnalogMagnitude()
 		std::complex<double> den(0, 0);
 
 		//double jw = i * 2 * M_PI;
-		double jw = (i * 2 * M_PI) / m_fOmegaPass_rads;
+		double jw = (i * 2 * M_PI) / (double)m_iSampleRate_Hz;
 		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
 			//std::complex<double> val = (m_fOmegaPass_rads * m_fOmegaStop_rads) / std::complex<double>(0, jw);
 
@@ -257,16 +257,20 @@ void cFilterDesign::setAnalogPhase()
 	m_vfPhase_s = { };
 	m_vfTransferFunction_s = { };
 	for (int i = 0; i < m_iSampleRate_Hz; i++) {
+		// Sweeping through possible frequencies
 		std::complex<double> num(m_fNumerator_s, 0);
 		std::complex<double> den(0, 0);
-		
+
 		//double jw = i * 2 * M_PI;
-		double jw = (i * 2 * M_PI) / m_fOmegaPass_rads;
+		double jw = (i * 2 * M_PI) / (double)m_iSampleRate_Hz;
 		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
 			//std::complex<double> val = (m_fOmegaPass_rads * m_fOmegaStop_rads) / std::complex<double>(0, jw);
-			std::complex<double> val = std::complex<double>((m_fOmegaStop_rads) / (m_fOmegaPass_rads), 0) / std::complex<double>(0, jw);
-			//den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
-			den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
+
+			std::complex<double> s = std::complex<double>(0, jw);
+			std::complex<double> val = std::complex<double>((m_fOmegaStop_rads) / (m_fOmegaPass_rads), 0) / s;
+
+			den = den + (m_vfDenominator_s.at(j) * pow(std::complex<double>(0, jw), m_vfDenominator_s.size() - 1 - j));
+			//den = den + (m_vfDenominator_s.at(j) * pow(val, m_vfDenominator_s.size() - 1 - j));
 		}
 
 		std::complex<double> val = num / den;
@@ -285,11 +289,13 @@ void cFilterDesign::setDigitalPhase()
 	m_vfPhase_z = { };
 	m_vfTransferFunction_s = { };
 	for (int i = 0; i < m_iSampleRate_Hz / 2; i++) {
+		
+		// Sweeping through possible frequencies
 		std::complex<double> num(m_fNumerator_s, 0);
 		std::complex<double> den(0, 0);
 
 		//double jw = i * 2 * M_PI;
-		double jw = (i * 2 * M_PI) / m_fOmegaPass_rads;
+		double jw = (i * 2 * M_PI) / (double)m_iSampleRate_Hz;
 		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
 			//std::complex<double> val = (m_fOmegaPass_rads * m_fOmegaStop_rads) / std::complex<double>(0, jw);
 
