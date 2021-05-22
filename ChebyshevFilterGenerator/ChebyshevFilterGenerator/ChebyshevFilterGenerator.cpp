@@ -93,22 +93,15 @@ int main(int argc, char* argv[])
     bool bMag = true;
 
     // RESET INPUT VARIABLES
-    //int iSampleRate_Hz = 75000;
-    int iSampleRate_Hz = 2000;
+    int iSampleRate_Hz = 175000;
     int iSmallestFreq_Hz = 10;
-    int iLargestFreq_Hz = 30000;
-    int iSignalLength_ms = 3000;
+    int iLargestFreq_Hz = 80000;
+    int iSignalLength_ms = 2000;
 
-    int iOmegaPass_Hz = 500;
-    int iOmegaStop_Hz = 700;
-    double iRipplePass = -1;
-    double iRippleStop = -32;
-
-    /*int iSampleRate_Hz = 300;
-    int iSmallestFreq_Hz = 10;
-    int iLargestFreq_Hz = 100;
-    int iSignalLength_ms = 3000;*/
-
+    int iOmegaPass_Hz = 42500;
+    int iOmegaStop_Hz = 72250;
+    double iRipplePass = -0.3;
+    double iRippleStop = -40;
 
     // ---------- MAIN PROGRAM LOOP ----------
     while (!glfwWindowShouldClose(window))

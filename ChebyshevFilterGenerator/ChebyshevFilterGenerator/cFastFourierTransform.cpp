@@ -11,7 +11,7 @@
 #define _USE_MATH_DEFINES
 #define REAL 0
 #define IMAG 1
-#define N 262144
+#define N 524288
 
 // ---------------------------------------------------------------------------
 // SYSTEM INCLUDE FILES
