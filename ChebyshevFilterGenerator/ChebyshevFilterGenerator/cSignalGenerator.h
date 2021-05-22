@@ -18,8 +18,8 @@ public:
 	cSignalGenerator(int &iSampleFreq_Hz, int &iSignalLength_ms, int &iLowestFreq_Hz, int &iHighestFreq_Hz, int iSWeepType);
 
 	// Public Methods
-	std::vector<float> getSignal_Time();
-	std::vector<float> getSignal_Freq();
+	std::vector<double> getSignal_Time();
+	std::vector<double> getSignal_Freq();
 
 	// Public Attributes
 
@@ -28,8 +28,8 @@ private:
 	void generateSignal(int &iSweepType);
 
 	// Private Attributes
-	std::vector<float> m_vfSignal_Time;
-	std::vector<float> m_vfSignal_Freq;
+	std::vector<double> m_vfSignal_Time;
+	std::vector<double> m_vfSignal_Freq;
 	int m_iSampleFreq_Hz;
 	int m_iLowestFreq_Hz;
 	int m_iHighestFreq_Hz;

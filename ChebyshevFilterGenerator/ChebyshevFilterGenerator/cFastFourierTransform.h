@@ -19,9 +19,9 @@ public:
 	cFastFourierTransform();
 
 	// Public Methods
-	void getFFT(std::vector<float>& vfSignal_Time);
-	std::vector<float> getMagnitude();
-	std::vector<float> getPhase();
+	void getFFT(std::vector<double>& vfSignal_Time);
+	std::vector<double> getMagnitude();
+	std::vector<double> getPhase();
 
 	// Public Attributes
 
@@ -31,16 +31,16 @@ private:
 	void ifft(fftw_complex* in, fftw_complex* out);
 	void displayComplex(fftw_complex* y);
 	void displayReal(fftw_complex* x);
-	void setMagnitude(std::vector<std::complex<float>>& vfFFT_complex);
-	void setPhase(std::vector<std::complex<float>>& vfFFT_complex);
-	//std::vector<float> getMagnitude();
-	//std::vector<float> getPhase();
+	void setMagnitude(std::vector<std::complex<double>>& vfFFT_complex);
+	void setPhase(std::vector<std::complex<double>>& vfFFT_complex);
+	//std::vector<double> getMagnitude();
+	//std::vector<double> getPhase();
 
 	// Private Attributes
 	int m_iFFTSize;
-	std::vector<std::complex<float>> m_vfFFT_complex;
-	std::vector<float> m_vfMagnitude;
-	std::vector<float> m_vfPhase;
+	std::vector<std::complex<double>> m_vfFFT_complex;
+	std::vector<double> m_vfMagnitude;
+	std::vector<double> m_vfPhase;
 	fftw_complex* x;
 	fftw_complex* y;
 };

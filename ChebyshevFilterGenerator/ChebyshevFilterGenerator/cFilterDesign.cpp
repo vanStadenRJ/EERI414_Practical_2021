@@ -44,8 +44,6 @@ cFilterDesign::cFilterDesign(int& iOmegaPass_Hz, int& iOmegaStop_Hz, double& iRi
 	m_fRippleStop_ratio = pow(10, iRippleStop_dB / (double)20);	
 
 	// Transform the Discrete Cut Off Frequencies to the Analog Domain
-	//m_fOmegaPass_rads = (tan(m_fDiscretePass_rads / (double)2)) * ((double)m_iSampleRate_Hz);
-	//m_fOmegaStop_rads = (tan(m_fDiscreteStop_rads / (double)2)) * ((double)m_iSampleRate_Hz);
 	m_fOmegaPass_rads = (tan(m_fDiscretePass_rads / (double)2));
 	m_fOmegaStop_rads = (tan(m_fDiscreteStop_rads / (double)2));
 	
@@ -81,7 +79,6 @@ void cFilterDesign::setAnalogFilterTF()
 	for (int i = 0; i < m_iOrder_N; i++) {
 
 		double fPhi = (M_PI / (double)2) + ((((2*i) + 1)*M_PI) / (2*(double)m_iOrder_N));
-		//std::complex<double> fPole((fMinorAxis * cos(fPhi)) / m_fOmegaPass_rads, (fMajorAxis * sin(fPhi)) / m_fOmegaPass_rads);
 		std::complex<double> fPole((fMinorAxis * cos(fPhi)), (fMajorAxis * sin(fPhi)));
 		vfDenominator.push_back(fPole);
 		if (m_iOrder_N % 2 == 0) {
@@ -123,10 +120,6 @@ void cFilterDesign::setAnalogFilterTF()
 	this->printPoly(m_vfDenominator_s);
 
 	std::cout << "\n======================" << std::endl << std::endl;
-
-	// Transform the LP Transfer Function to a HP Transfer Function
-
-
 }
 
 // ---------- Multiply Factors of Polynomial ----------
@@ -186,12 +179,6 @@ void cFilterDesign::setAnalogMagnitude()
 	//m_vfPhase_s = { };
 	m_vfX_s = { };
 	for (int i = 0; i < m_iSampleRate_Hz; i++) {
-		// Using Forumla
-		/*double fFreq = (i * 2 * M_PI) / m_fOmegaPass_rads;
-		double fMag = 1 / sqrt(1 + pow(fEpsilon, 2) * pow(t_n(fFreq), 2));
-		m_vfX_s.push_back(i);
-		m_vfMagnitude_s.push_back(20 * log10(fMag));*/		
-
 		// Sweeping through possible frequencies
 		std::complex<double> num(m_fNumerator_s, 0);
 		std::complex<double> den(0, 0);
@@ -221,12 +208,6 @@ void cFilterDesign::setDigitalMagnitude()
 	//m_vfPhase_s = { };
 	m_vfX_z = { };
 	for (int i = 0; i < m_iSampleRate_Hz / 2; i++) {
-		// Using Forumla
-		/*double fFreq = (i * 2 * M_PI) / m_fOmegaPass_rads;
-		double fMag = 1 / sqrt(1 + pow(fEpsilon, 2) * pow(t_n(fFreq), 2));
-		m_vfX_s.push_back(i);
-		m_vfMagnitude_s.push_back(20 * log10(fMag));*/
-
 		// Sweeping through possible frequencies
 		std::complex<double> num(m_fNumerator_s, 0);
 		std::complex<double> den(0, 0);
@@ -234,7 +215,6 @@ void cFilterDesign::setDigitalMagnitude()
 		//double jw = i * 2 * M_PI;
 		double jw = (i * 2 * M_PI) / (double)m_iSampleRate_Hz;
 		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
-			//std::complex<double> val = (m_fOmegaPass_rads * m_fOmegaStop_rads) / std::complex<double>(0, jw);
 
 			std::complex<double> ejw = exp(std::complex<double>(0, jw));
 			std::complex<double> s = (ejw - std::complex<double>(1, 0)) / (ejw + std::complex<double>(1, 0));
@@ -264,7 +244,6 @@ void cFilterDesign::setAnalogPhase()
 		//double jw = i * 2 * M_PI;
 		double jw = (i * 2 * M_PI) / (double)m_iSampleRate_Hz;
 		for (int j = 0; j < m_vfDenominator_s.size(); j++) {
-			//std::complex<double> val = (m_fOmegaPass_rads * m_fOmegaStop_rads) / std::complex<double>(0, jw);
 
 			std::complex<double> s = std::complex<double>(0, jw);
 			std::complex<double> val = std::complex<double>(m_fOmegaStop_rads * m_fOmegaPass_rads, 0) / s;
@@ -276,10 +255,6 @@ void cFilterDesign::setAnalogPhase()
 		std::complex<double> val = num / den;
 		m_vfTransferFunction_s.push_back(val);
 		m_vfPhase_s.push_back(atan(val.imag() / val.real()));
-
-		/*if (i < 1000) {
-			std::cout << i << ":\t" << m_vfMagnitude_s.at(i) << "\t" << m_vfPhase_s.at(i) << std::endl;
-		}*/
 	}
 }
 
@@ -310,10 +285,6 @@ void cFilterDesign::setDigitalPhase()
 		std::complex<double> val = num / den;
 		m_vfTransferFunction_s.push_back(val);
 		m_vfPhase_z.push_back(atan(val.imag() / val.real()));
-
-		/*if (i < 1000) {
-			std::cout << i << ":\t" << m_vfMagnitude_s.at(i) << "\t" << m_vfPhase_s.at(i) << std::endl;
-		}*/
 	}
 }
 
@@ -331,7 +302,7 @@ std::vector<std::complex<double>> cFilterDesign::getTransferFunction(bool bAnalo
 }
 
 // ---------- Determine Analog Phase ----------
-std::vector<float> cFilterDesign::getYAxis(bool bAnalog, bool bMag)
+std::vector<double> cFilterDesign::getYAxis(bool bAnalog, bool bMag)
 {
 	if (bAnalog == true) {
 		// Return Analog Magnitude / Phase
@@ -356,7 +327,7 @@ std::vector<float> cFilterDesign::getYAxis(bool bAnalog, bool bMag)
 }
 
 // ---------- Determine Analog Phase ----------
-std::vector<float> cFilterDesign::getXAxis(bool bAnalog)
+std::vector<double> cFilterDesign::getXAxis(bool bAnalog)
 {
 	if (bAnalog == true) {
 		// Return Analog x-axis

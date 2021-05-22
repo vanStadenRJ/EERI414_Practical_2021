@@ -31,7 +31,7 @@ cFastFourierTransform::cFastFourierTransform():
 }
 
 // ---------- RETURN FFT IN VECTOR FORMAT ----------
-void cFastFourierTransform::getFFT(std::vector<float>& vfSignal_Time)
+void cFastFourierTransform::getFFT(std::vector<double>& vfSignal_Time)
 {
 	// Set FFT array size
 	m_iFFTSize = vfSignal_Time.size();
@@ -78,7 +78,7 @@ void cFastFourierTransform::getFFT(std::vector<float>& vfSignal_Time)
 
 	m_vfFFT_complex.clear();
 	for (int i = 0; i < N; i++) {
-		std::complex<float> mycomplex(y[i][REAL], y[i][IMAG]);
+		std::complex<double> mycomplex(y[i][REAL], y[i][IMAG]);
 		m_vfFFT_complex.push_back(mycomplex);
 		//std::cout << "\n" << y[i][REAL] << " " << y[i][IMAG] << "i\n" << std::endl;
 	}
@@ -91,23 +91,23 @@ void cFastFourierTransform::getFFT(std::vector<float>& vfSignal_Time)
 // ---------- RETURN IFFT IN VECTOR FORMAT ----------
 
 // ---------- RETURN MAGNITUDE RESPONSE ----------
-std::vector<float> cFastFourierTransform::getMagnitude()
+std::vector<double> cFastFourierTransform::getMagnitude()
 {
 	return m_vfMagnitude;
 }
 
 // ---------- RETURN PHASE RESPONSE ----------
-std::vector<float> cFastFourierTransform::getPhase()
+std::vector<double> cFastFourierTransform::getPhase()
 {
 	return m_vfPhase;
 }
 
 // ---------- COMPUTE MAGNITUDE SPECTRUM ----------
-void cFastFourierTransform::setMagnitude(std::vector<std::complex<float>>& vfFFT_complex)
+void cFastFourierTransform::setMagnitude(std::vector<std::complex<double>>& vfFFT_complex)
 {
 	m_vfMagnitude.clear();
 	for (int i = 0; i < vfFFT_complex.size() / 2; i++) {
-		float mag = abs(vfFFT_complex.at(i)) / (float)N;
+		double mag = abs(vfFFT_complex.at(i)) / (double)N;
 		m_vfMagnitude.push_back(2*mag);
 	}
 
@@ -115,13 +115,13 @@ void cFastFourierTransform::setMagnitude(std::vector<std::complex<float>>& vfFFT
 }
 
 // ---------- COMPUTE PHASE SPECTRUM ----------
-void cFastFourierTransform::setPhase(std::vector<std::complex<float>>& vfFFT_complex)
+void cFastFourierTransform::setPhase(std::vector<std::complex<double>>& vfFFT_complex)
 {
 	m_vfPhase.clear();
 	for (int i = 0; i < vfFFT_complex.size(); i++) {
-		float real = vfFFT_complex.at(i).real();
-		float imag = vfFFT_complex.at(i).imag();
-		float phase = atan(imag / real);
+		double real = vfFFT_complex.at(i).real();
+		double imag = vfFFT_complex.at(i).imag();
+		double phase = atan(imag / real);
 		m_vfPhase.push_back(phase);
 	}
 }

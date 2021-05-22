@@ -41,12 +41,12 @@ cSignalGenerator::cSignalGenerator(int &iSampleFreq_Hz, int &iSignalLength_ms, i
 }
 
 // ---------- GENERATE TIME-DOMAIN SIGNAL ----------
-std::vector<float> cSignalGenerator::getSignal_Time()
+std::vector<double> cSignalGenerator::getSignal_Time()
 {
 	return m_vfSignal_Time;
 }
 
-std::vector<float> cSignalGenerator::getSignal_Freq()
+std::vector<double> cSignalGenerator::getSignal_Freq()
 {
 	return m_vfSignal_Freq;
 }
@@ -59,48 +59,33 @@ void cSignalGenerator::generateSignal(int &iSweepType)
 	- Sweep from 30kHz - 0kHz in last 2.5 seconds	
 	*/
 	m_vfSignal_Time = { };
-	float T = (float)m_iSignalLength_ms / (float)1000;
-	float fNrSamples = T * m_iSampleFreq_Hz;
+	double T = (double)m_iSignalLength_ms / (double)1000;
+	double fNrSamples = T * m_iSampleFreq_Hz;
 
 	for (int i = 0; i <= fNrSamples; i++) {
 		// Translate Nr of Samples to Times
-		float t = i * (T / fNrSamples);
+		double t = i * (T / fNrSamples);
 
 		switch (iSweepType) {
 		// Calculate the Linear Sweep from Lowest to Highest Frequency
 		case 0:
-			m_vfSignal_Time.push_back(sin(2 * M_PI * ((m_iLowestFreq_Hz * t) + (((m_iHighestFreq_Hz - m_iLowestFreq_Hz) / (2 * T)) * pow(t, 2)))));
+			m_vfSignal_Time.push_back(1 * sin(2 * M_PI * ((m_iLowestFreq_Hz * t) + (((m_iHighestFreq_Hz - m_iLowestFreq_Hz) / (2 * T)) * pow(t, 2)))));
 			break;
 		
 		// Calculate the Logarithmic Sweep from Lowest to Highest Frequency
 		case 1:
-			m_vfSignal_Time.push_back(sin(2 * M_PI * m_iLowestFreq_Hz * T * ((pow(((m_iHighestFreq_Hz) / (m_iLowestFreq_Hz)), (t / T)) - 1) / (log((m_iHighestFreq_Hz) / (m_iLowestFreq_Hz))))));
+			m_vfSignal_Time.push_back(1 * sin(2 * M_PI * m_iLowestFreq_Hz * T * ((pow(((m_iHighestFreq_Hz) / (m_iLowestFreq_Hz)), (t / T)) - 1) / (log((m_iHighestFreq_Hz) / (m_iLowestFreq_Hz))))));
 			break;
 
 		// Calculate the summation of 5 different frequencies, equally distanced
 		case 2:
-			float d = 0;
-			for (int j = 0; i < 5; i++) {
-				float f = ((float)m_iHighestFreq_Hz / (float)5) * j;
-				d = d + sin(2 * M_PI * f * t);
+			double d = sin(2 * M_PI * m_iLowestFreq_Hz * t);
+			for (int j = 1; j <= 5; j++) {
+				double f = ((double)m_iHighestFreq_Hz / (double)5) * j;
+				d = d + j * sin(2 * M_PI * f * t);
 			}
 			m_vfSignal_Time.push_back(d);
 			break;
 		}		
 	}
 }
-
-/*
-void cSignalGenerator::calculateFFT()
-{
-	// Create new FFT object
-	std::shared_ptr<cFastFourierTransform> pLocalFFT = std::make_shared<cFastFourierTransform>(m_vfSignal_Time);
-
-	// Create new complex Vector
-	std::vector<std::complex<float>> vfFFT_complex = pLocalFFT->getFFT();
-
-	// Get Magnitude Spectrum
-
-	// Get Phase Spectrum
-}
-*/
