@@ -67,12 +67,17 @@ void cFilterDesign::setAnalogFilterTF()
 	// Set Order N
 	double fOrder = acosh(sqrt(((1 / pow(m_fRippleStop_ratio, 2)) - 1) / ((1 / pow(m_fRipplePass_ratio, 2)) - 1))) / acosh(m_fOmegaStop_rads / m_fOmegaPass_rads);
 	m_iOrder_N = ceil(fOrder);
+	std::cout << "Order (N):                  " << fOrder << "~~ " << m_iOrder_N <<std::endl;
 
 	// Calculate the Minor and Major Axis
 	fEpsilon = sqrt(1 / pow(m_fRipplePass_ratio, 2) - 1);
+	std::cout << "Epsilon:                    " << fEpsilon << std::endl;
 	double fUnit = pow(fEpsilon, -1) + sqrt(1 + pow(fEpsilon, -2));
+	std::cout << "A:                          " << fUnit << std::endl;
 	double fMinorAxis = m_fOmegaPass_rads * ((pow(fUnit, (double)1 / (double)m_iOrder_N) - pow(fUnit, (double)-1 / (double)m_iOrder_N)) / (double)2);
+	std::cout << "Minor Axis:                 " << fMinorAxis << std::endl;
 	double fMajorAxis = m_fOmegaPass_rads * ((pow(fUnit, (double)1 / (double)m_iOrder_N) + pow(fUnit, (double)-1 / (double)m_iOrder_N)) / (double)2);
+	std::cout << "Major Axis:                 " << fMajorAxis << std::endl;
 
 	// Determine the Denominator of the Transfer Function
 	std::vector<std::complex<double>> vfDenominator;
