@@ -58,6 +58,10 @@ cFilterDesign::cFilterDesign(int& iOmegaPass_Hz, int& iOmegaStop_Hz, double& iRi
 	this->setAnalogPhase();
 	this->setDigitalMagnitude();
 	this->setDigitalPhase();
+
+	std::vector<double> num = { 0.00184647, -0.007385884, 0.01107883, -0.0073858844, 0.0018464711 };
+	std::vector<double> den = { 1, 2.990801, 3.62682596, 2.07580297, 0.470359711 };
+	this->setGrayMarkel(num, den);
 }
 
 
@@ -331,6 +335,93 @@ std::vector<double> cFilterDesign::getYAxis(bool bAnalog, bool bMag)
 	}
 }
 
+// ---------- Gray-Markel Realisation
+void cFilterDesign::setGrayMarkel(std::vector<double>& vfNumerator, std::vector<double>& vfDenominator)
+{
+	// Clear Lattice and Feedback Vectors
+	m_vfLattice_k = { };
+	m_vfFeedForward_a = { };
+
+	// Get Degree of Polynomial
+	int N = vfDenominator.size() - 1;
+
+	std::vector<double> a_1;
+	std::vector<double> del;
+	for (int i = 0; i < N;  i++) {
+		// Initialise Lattice Vector with ones
+		m_vfLattice_k.push_back(1);	
+	}
+	
+	// Determine a_1
+	for (int i = 0; i < N + 1; i++) {		
+		a_1.push_back(vfDenominator.at(i) / vfDenominator.at(0));
+		del.push_back(vfDenominator.at(i) / vfDenominator.at(0));
+	}
+	std::cout << "a_1: ";
+	for (int i = 0; i < a_1.size(); i++) {
+		std::cout << a_1.at(i) << "  ";
+	}
+	std::cout << std::endl;
+
+	// Initialise Feed-Forward vector
+	for (int i = N; i >= 0; i--) {
+		m_vfFeedForward_a.push_back(vfNumerator.at(i) / vfDenominator.at(0));
+	}
+
+	// Gray-Markel Realisation
+	for (int i = N - 1; i >= 0; i--) {
+		std::cout << "i: " << i << std::endl;
+		// Set Feed-Forward
+		int t = 1;
+		for (int j = N - i; j <= N; j++) {
+			m_vfFeedForward_a[j] = m_vfFeedForward_a[j] - (m_vfFeedForward_a[N - i - 1] * a_1[t]);
+			t++;
+		}
+		std::cout << "Feed-Forward: ";
+		for (int i = 0; i < m_vfFeedForward_a.size(); i++) {
+			std::cout << m_vfFeedForward_a.at(i) << "  ";
+		}
+		std::cout << std::endl;
+
+		// Set Lattice
+		m_vfLattice_k[i] = a_1[i+1];
+		std::cout << "Lattice: ";
+		for (int i = 0; i < m_vfLattice_k.size(); i++) {
+			std::cout << m_vfLattice_k.at(i) << "  ";
+		}
+		std::cout << std::endl;
+
+		// Set a_1
+		t = i+1;
+		for (int j = 0; j <= i+1; j++) {
+			del[j] = (a_1[j] - (m_vfLattice_k[i] * a_1[t])) / ((double)1 - (m_vfLattice_k[i] * m_vfLattice_k[i]));
+			t--;
+		}
+		a_1 = del;
+		std::cout << std::endl;
+		std::cout << "a_1: ";
+		for (int i = 0; i < a_1.size(); i++) {
+			std::cout << a_1.at(i) << "  ";
+		}
+		std::cout << std::endl;
+
+		std::cout << std::endl;
+	}
+
+	// Output the Parameters
+	std::cout << "Lattice: ";
+	for (int i = 0; i < m_vfLattice_k.size(); i++) {
+		std::cout << m_vfLattice_k.at(i) << "  ";
+	}
+	std::cout << std::endl;
+
+	std::cout << "Feed-Forward: ";
+	for (int i = 0; i < m_vfFeedForward_a.size(); i++) {
+		std::cout << m_vfFeedForward_a.at(i) << "  ";
+	}
+	std::cout << std::endl;
+}
+
 // ---------- Determine Analog Phase ----------
 std::vector<double> cFilterDesign::getXAxis(bool bAnalog)
 {
@@ -342,4 +433,16 @@ std::vector<double> cFilterDesign::getXAxis(bool bAnalog)
 		// Return Digital x-axis
 		return m_vfX_z;
 	}
+}
+
+// ---------- Return Lattice Vector (Gray-Markel) ----------
+std::vector<double> cFilterDesign::getLattice()
+{
+	//return m_vfLattice_k;
+}
+
+// ---------- Return Feed-Forward Vector (Gray-Markel) ----------
+std::vector<double> cFilterDesign::getFeedForward()
+{
+	//return m_vfFeedForward_a;
 }

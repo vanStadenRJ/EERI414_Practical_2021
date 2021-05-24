@@ -21,6 +21,8 @@ public:
 	std::vector<std::complex<double>> getTransferFunction(bool bAnalog);
 	std::vector<double> getYAxis(bool bAnalog, bool bMag);
 	std::vector<double> getXAxis(bool bAnalog);
+	std::vector<double> getLattice();
+	std::vector<double> getFeedForward();
 
 	// Public Attributes
 
@@ -31,6 +33,7 @@ private:
 	void setAnalogPhase();
 	void setDigitalMagnitude();
 	void setDigitalPhase();
+	void setGrayMarkel(std::vector<double> &vfNumerator, std::vector<double> &vfDenominator);
 	std::vector<std::complex<double>> polyMul(std::vector<std::complex<double>> A, std::vector<std::complex<double>> B);
 	void printPoly(std::vector<double>& vfPolynomial);
 	double t_n(double& fFreq);
@@ -56,6 +59,8 @@ private:
 	std::vector<double> m_vfPhase_z;									// Digital Filter Phase Response
 	std::vector<double> m_vfX_s;										// X-axis of the Analog Magnitude	
 	std::vector<double> m_vfX_z;										// X-axis of the Digital Magnitude
+	std::vector<double> m_vfLattice_k;									// Gray-Markel Realisation Lattice Vector
+	std::vector<double> m_vfFeedForward_a;								// Gray-Markel Realisation Feedforward Vector
 	
 };
 
