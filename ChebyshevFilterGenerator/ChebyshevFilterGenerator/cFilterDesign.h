@@ -18,6 +18,8 @@ public:
 	cFilterDesign(int &iOmegaPass_Hz, int &iOmegaStop_Hz, double &iRipplePass_dB, double &iRippleStop_dB, int &iSampleRate_Hz);
 
 	// Public Methods
+	void setAnalogFilterTF();
+	void setGrayMarkel(std::vector<double>& vfNumerator, std::vector<double>& vfDenominator);
 	std::vector<std::complex<double>> getTransferFunction(bool bAnalog);
 	std::vector<double> getYAxis(bool bAnalog, bool bMag);
 	std::vector<double> getXAxis(bool bAnalog);
@@ -27,13 +29,13 @@ public:
 	// Public Attributes
 
 private:
-	// Private Methods
-	void setAnalogFilterTF();
+	// Private Methods	
 	void setAnalogMagnitude();
 	void setAnalogPhase();
 	void setDigitalMagnitude();
 	void setDigitalPhase();
-	void setGrayMarkel(std::vector<double> &vfNumerator, std::vector<double> &vfDenominator);
+	void displayFilterParameters();
+	
 	std::vector<std::complex<double>> polyMul(std::vector<std::complex<double>> A, std::vector<std::complex<double>> B);
 	void printPoly(std::vector<double>& vfPolynomial);
 	double t_n(double& fFreq);

@@ -15,17 +15,17 @@ class cSignalGenerator
 public:
 	// Constructors
 	cSignalGenerator();
-	cSignalGenerator(int &iSampleFreq_Hz, int &iSignalLength_ms, int &iLowestFreq_Hz, int &iHighestFreq_Hz, int iSWeepType);
+	cSignalGenerator(int &iSampleFreq_Hz, int &iSignalLength_ms, int &iLowestFreq_Hz, int &iHighestFreq_Hz);
 
 	// Public Methods
 	std::vector<double> getSignal_Time();
 	std::vector<double> getSignal_Freq();
+	void generateSignal(int iSweepType);
 
 	// Public Attributes
 
 private:
-	// Private Methods
-	void generateSignal(int &iSweepType);
+	// Private Methods	
 
 	// Private Attributes
 	std::vector<double> m_vfSignal_Time;

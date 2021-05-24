@@ -27,17 +27,15 @@ cSignalGenerator::cSignalGenerator(void) :
 	m_iSampleFreq_Hz(0),
 	m_iSignalLength_ms(0)
 {
-	
+	// DEFAULT CONSTRUCTOR
 }
 
-cSignalGenerator::cSignalGenerator(int &iSampleFreq_Hz, int &iSignalLength_ms, int &iLowestFreq_Hz, int &iHighestFreq_Hz, int iSWeepType)
+cSignalGenerator::cSignalGenerator(int &iSampleFreq_Hz, int &iSignalLength_ms, int &iLowestFreq_Hz, int &iHighestFreq_Hz)
 {
 	m_iSampleFreq_Hz = iSampleFreq_Hz;			// Get Sample Rate from main
 	m_iLowestFreq_Hz = iLowestFreq_Hz;			// Get smallest Frequency in range for generation
 	m_iHighestFreq_Hz = iHighestFreq_Hz;		// Get largest frequency in range for generation
-	m_iSignalLength_ms = iSignalLength_ms;		// Get length of signal in seconds
-
-	this->generateSignal(iSWeepType);			// Generate the Time-Domain Signal	
+	m_iSignalLength_ms = iSignalLength_ms;		// Get length of signal in seconds	
 }
 
 // ---------- GENERATE TIME-DOMAIN SIGNAL ----------
@@ -51,7 +49,7 @@ std::vector<double> cSignalGenerator::getSignal_Freq()
 	return m_vfSignal_Freq;
 }
 
-void cSignalGenerator::generateSignal(int &iSweepType)
+void cSignalGenerator::generateSignal(int iSweepType)
 {
 	/*
 	Generate a 5 second Signal with frequencies ranging from 0 30 kHz
@@ -62,7 +60,7 @@ void cSignalGenerator::generateSignal(int &iSweepType)
 	double T = (double)m_iSignalLength_ms / (double)1000;
 	double fNrSamples = T * m_iSampleFreq_Hz;
 
-	for (int i = 0; i <= fNrSamples; i++) {
+	for (int i = 0; i < fNrSamples; i++) {
 		// Translate Nr of Samples to Times
 		double t = i * (T / fNrSamples);
 
@@ -82,7 +80,7 @@ void cSignalGenerator::generateSignal(int &iSweepType)
 			double d = sin(2 * M_PI * m_iLowestFreq_Hz * t);
 			for (int j = 1; j <= 5; j++) {
 				double f = ((double)m_iHighestFreq_Hz / (double)5) * j;
-				d = d + j * sin(2 * M_PI * f * t);
+				d = d + sin(2 * M_PI * f * t);
 			}
 			m_vfSignal_Time.push_back(d);
 			break;

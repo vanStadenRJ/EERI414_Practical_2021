@@ -45,29 +45,24 @@ cFilterDesign::cFilterDesign(int& iOmegaPass_Hz, int& iOmegaStop_Hz, double& iRi
 
 	// Transform the Discrete Cut Off Frequencies to the Analog Domain
 	m_fOmegaPass_rads = (tan(m_fDiscretePass_rads / (double)2));
-	m_fOmegaStop_rads = (tan(m_fDiscreteStop_rads / (double)2));
-	
+	m_fOmegaStop_rads = (tan(m_fDiscreteStop_rads / (double)2));	
+}
+
+// ---------- DISPLAY FILTER PARAMETERS ----------
+void cFilterDesign::displayFilterParameters()
+{
 	std::cout << "Discrete Pass Freq (rad/s): " << m_fDiscretePass_rads << std::endl;
 	std::cout << "Discrete Stop Freq (rad/s): " << m_fDiscreteStop_rads << std::endl;
 	std::cout << "Analog Pass Freq (Hz):      " << m_fOmegaPass_rads << std::endl;
 	std::cout << "Analog Stop Freq (Hz):      " << m_fOmegaStop_rads << std::endl;
-
-	// Calculate the Analog Transfer Function
-	this->setAnalogFilterTF();
-	this->setAnalogMagnitude();
-	this->setAnalogPhase();
-	this->setDigitalMagnitude();
-	this->setDigitalPhase();
-
-	std::vector<double> num = { 0.00184647, -0.007385884, 0.01107883, -0.0073858844, 0.0018464711 };
-	std::vector<double> den = { 1, 2.990801, 3.62682596, 2.07580297, 0.470359711 };
-	this->setGrayMarkel(num, den);
 }
-
 
 // ---------- CALCULATE ANALOG FILTER CHARACTERISTICS ----------
 void cFilterDesign::setAnalogFilterTF()
 {
+	// Display Filter Parameters
+	this->displayFilterParameters();
+
 	// Set Order N
 	double fOrder = acosh(sqrt(((1 / pow(m_fRippleStop_ratio, 2)) - 1) / ((1 / pow(m_fRipplePass_ratio, 2)) - 1))) / acosh(m_fOmegaStop_rads / m_fOmegaPass_rads);
 	m_iOrder_N = ceil(fOrder);
@@ -129,6 +124,12 @@ void cFilterDesign::setAnalogFilterTF()
 	this->printPoly(m_vfDenominator_s);
 
 	std::cout << "\n======================" << std::endl << std::endl;
+
+	// Continue to Rest of Filter Design
+	this->setAnalogMagnitude();
+	this->setAnalogPhase();
+	this->setDigitalMagnitude();
+	this->setDigitalPhase();	
 }
 
 // ---------- Multiply Factors of Polynomial ----------
@@ -357,11 +358,6 @@ void cFilterDesign::setGrayMarkel(std::vector<double>& vfNumerator, std::vector<
 		a_1.push_back(vfDenominator.at(i) / vfDenominator.at(0));
 		del.push_back(vfDenominator.at(i) / vfDenominator.at(0));
 	}
-	std::cout << "a_1: ";
-	for (int i = 0; i < a_1.size(); i++) {
-		std::cout << a_1.at(i) << "  ";
-	}
-	std::cout << std::endl;
 
 	// Initialise Feed-Forward vector
 	for (int i = N; i >= 0; i--) {
@@ -370,26 +366,15 @@ void cFilterDesign::setGrayMarkel(std::vector<double>& vfNumerator, std::vector<
 
 	// Gray-Markel Realisation
 	for (int i = N - 1; i >= 0; i--) {
-		std::cout << "i: " << i << std::endl;
 		// Set Feed-Forward
 		int t = 1;
 		for (int j = N - i; j <= N; j++) {
 			m_vfFeedForward_a[j] = m_vfFeedForward_a[j] - (m_vfFeedForward_a[N - i - 1] * a_1[t]);
 			t++;
 		}
-		std::cout << "Feed-Forward: ";
-		for (int i = 0; i < m_vfFeedForward_a.size(); i++) {
-			std::cout << m_vfFeedForward_a.at(i) << "  ";
-		}
-		std::cout << std::endl;
 
 		// Set Lattice
 		m_vfLattice_k[i] = a_1[i+1];
-		std::cout << "Lattice: ";
-		for (int i = 0; i < m_vfLattice_k.size(); i++) {
-			std::cout << m_vfLattice_k.at(i) << "  ";
-		}
-		std::cout << std::endl;
 
 		// Set a_1
 		t = i+1;
@@ -398,28 +383,7 @@ void cFilterDesign::setGrayMarkel(std::vector<double>& vfNumerator, std::vector<
 			t--;
 		}
 		a_1 = del;
-		std::cout << std::endl;
-		std::cout << "a_1: ";
-		for (int i = 0; i < a_1.size(); i++) {
-			std::cout << a_1.at(i) << "  ";
-		}
-		std::cout << std::endl;
-
-		std::cout << std::endl;
-	}
-
-	// Output the Parameters
-	std::cout << "Lattice: ";
-	for (int i = 0; i < m_vfLattice_k.size(); i++) {
-		std::cout << m_vfLattice_k.at(i) << "  ";
-	}
-	std::cout << std::endl;
-
-	std::cout << "Feed-Forward: ";
-	for (int i = 0; i < m_vfFeedForward_a.size(); i++) {
-		std::cout << m_vfFeedForward_a.at(i) << "  ";
-	}
-	std::cout << std::endl;
+	}	
 }
 
 // ---------- Determine Analog Phase ----------
@@ -438,11 +402,11 @@ std::vector<double> cFilterDesign::getXAxis(bool bAnalog)
 // ---------- Return Lattice Vector (Gray-Markel) ----------
 std::vector<double> cFilterDesign::getLattice()
 {
-	//return m_vfLattice_k;
+	return m_vfLattice_k;
 }
 
 // ---------- Return Feed-Forward Vector (Gray-Markel) ----------
 std::vector<double> cFilterDesign::getFeedForward()
 {
-	//return m_vfFeedForward_a;
+	return m_vfFeedForward_a;
 }

@@ -11,7 +11,8 @@
 #define _USE_MATH_DEFINES
 #define REAL 0
 #define IMAG 1
-#define N 524288
+//#define N 524288
+#define N 175000
 
 // ---------------------------------------------------------------------------
 // SYSTEM INCLUDE FILES
@@ -51,16 +52,12 @@ void cFastFourierTransform::getFFT(std::vector<double>& vfSignal_Time)
 		u++;
 	}
 
-	std::cout << "Length Before Padding: " << u << std::endl;
-
 	// Zero Padding for efficiency
 	for (int i = m_iFFTSize; i < N; i++) {
 		x[i][REAL] = 0;
 		x[i][IMAG] = 0;
 		u++;
 	}
-
-	std::cout << "Length After Padding: " << u << std::endl;
 
 	// Compute FFT
 	this->fft(x, y);
@@ -118,7 +115,7 @@ void cFastFourierTransform::setMagnitude(std::vector<std::complex<double>>& vfFF
 void cFastFourierTransform::setPhase(std::vector<std::complex<double>>& vfFFT_complex)
 {
 	m_vfPhase.clear();
-	for (int i = 0; i < vfFFT_complex.size(); i++) {
+	for (int i = 0; i < vfFFT_complex.size() / 2; i++) {
 		double real = vfFFT_complex.at(i).real();
 		double imag = vfFFT_complex.at(i).imag();
 		double phase = atan(imag / real);

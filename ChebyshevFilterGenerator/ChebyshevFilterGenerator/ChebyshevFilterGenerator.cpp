@@ -91,13 +91,21 @@ int main(int argc, char* argv[])
     std::vector<double> vfTime_X;
     std::vector<double> vfFreq_Y;
     std::vector<double> vfFreq_X;
+
+    std::vector<double> vfTime_Original;
+    std::vector<double> vfTime_Realisation;
+    std::vector<double> vfMag_Original;
+    std::vector<double> vfMag_Realisation;
+    std::vector<double> vfPhase_Original;
+    std::vector<double> vfPhase_Realisation;
+
     bool bMag = true;
 
     // RESET INPUT VARIABLES
     int iSampleRate_Hz = 175000;
     int iSmallestFreq_Hz = 10;
     int iLargestFreq_Hz = 80000;
-    int iSignalLength_ms = 2000;
+    int iSignalLength_ms = 1000;
 
     int iOmegaPass_Hz = 42500;
     int iOmegaStop_Hz = 72250;
@@ -110,6 +118,8 @@ int main(int argc, char* argv[])
     std::string strBottom_Title;
     std::string strBottom_X;
     std::string strBottom_Y;
+
+    int iSweepVariable = 2;
 
     // ---------- MAIN PROGRAM LOOP ----------
     while (!glfwWindowShouldClose(window))
@@ -161,11 +171,14 @@ int main(int argc, char* argv[])
         std::vector<double> vfTop_Y;
         std::vector<double> vfTop_X;
         std::vector<double> vfBottom_Y;        
-        std::vector<double> vfBottom_X;
+        std::vector<double> vfBottom_X;         
 
+        std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>(iSampleRate_Hz, iSignalLength_ms, iSmallestFreq_Hz, iLargestFreq_Hz);
         if (ImGui::Button("LINEAR SWEEP", ImVec2(118, 25))) {
             // PLOT DATA BASED ON INPUT DATA  
-            std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>(iSampleRate_Hz, iSignalLength_ms, iSmallestFreq_Hz, iLargestFreq_Hz, 0);
+            pLocalSignal->generateSignal(0);
+            iSweepVariable = 0;
+
             vfTime_Y = pLocalSignal->getSignal_Time();
             vfTime_X.clear();
             for (int i = 0; i < vfTime_Y.size(); i++) {
@@ -182,7 +195,9 @@ int main(int argc, char* argv[])
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 122);
         if (ImGui::Button("LOG SWEEP", ImVec2(118, 25))) {
             // PLOT DATA BASED ON INPUT DATA  
-            std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>(iSampleRate_Hz, iSignalLength_ms, iSmallestFreq_Hz, iLargestFreq_Hz, 1);
+            pLocalSignal->generateSignal(1);
+            iSweepVariable = 1;
+
             vfTime_Y = pLocalSignal->getSignal_Time();
             vfTime_X.clear();
             for (int i = 0; i < vfTime_Y.size(); i++) {
@@ -200,7 +215,9 @@ int main(int argc, char* argv[])
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 122 + 122);
         if (ImGui::Button("SINE SUM", ImVec2(118, 25))) {
             // PLOT DATA BASED ON INPUT DATA  
-            std::shared_ptr<cSignalGenerator> pLocalSignal = std::make_shared<cSignalGenerator>(iSampleRate_Hz, iSignalLength_ms, iSmallestFreq_Hz, iLargestFreq_Hz, 2);
+            pLocalSignal->generateSignal(2);
+            iSweepVariable = 2;
+
             vfTime_Y = pLocalSignal->getSignal_Time();
             vfTime_X.clear();
             for (int i = 0; i < vfTime_Y.size(); i++) {
@@ -212,8 +229,7 @@ int main(int argc, char* argv[])
             strTop_Y = "Amplitude (V)";
 
             cond_Plot = ImGuiCond_Always;
-        }
-        
+        }        
 
         ImGui::Text("\n");
         ImGui::Text("====================================================");
@@ -254,7 +270,7 @@ int main(int argc, char* argv[])
 
         ImGui::Text("\n");
         ImGui::Text("====================================================");
-        ImGui::Text("                ANALOG FILTER DESIGN                ");
+        ImGui::Text("------------------- FILTER DESIGN ------------------");
         ImGui::Text("====================================================");
 
         // INPUT PASSBAND EDGE FREQUENCY
@@ -281,8 +297,9 @@ int main(int argc, char* argv[])
         ImGui::InputDouble("dB##StopbandRipple", &iRippleStop, 1, 10);
         ImGui::Text("\n");
 
-        if (ImGui::Button("ANALOG", ImVec2(179, 25))) {
-            std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop, iSampleRate_Hz);            
+        std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop, iSampleRate_Hz);
+        if (ImGui::Button("ANALOG", ImVec2(179, 25))) { 
+            pLocalFilter->setAnalogFilterTF();
             vfTime_Y = pLocalFilter->getYAxis(true, true);
             vfFreq_Y = pLocalFilter->getYAxis(true, false);
             vfTime_X.clear();
@@ -303,8 +320,8 @@ int main(int argc, char* argv[])
         }
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 29);
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 183);
-        if (ImGui::Button("DIGITAL", ImVec2(179, 25))) {
-            std::shared_ptr<cFilterDesign> pLocalFilter = std::make_shared<cFilterDesign>(iOmegaPass_Hz, iOmegaStop_Hz, iRipplePass, iRippleStop, iSampleRate_Hz);
+        if (ImGui::Button("DIGITAL", ImVec2(179, 25))) {    
+            pLocalFilter->setAnalogFilterTF();
             vfTime_Y = pLocalFilter->getYAxis(false, true);
             vfFreq_Y = pLocalFilter->getYAxis(false, false);
             vfTime_X.clear();
@@ -320,6 +337,173 @@ int main(int argc, char* argv[])
             strBottom_Title = "DIGITAL FILTER: PHASE SPECTRUM";
             strBottom_X = "Frequency (Hz)";
             strBottom_Y = "Angle (rad)";
+
+            cond_Plot = ImGuiCond_Always;
+        }
+
+        ImGui::Text("\n");
+        ImGui::Text("====================================================");
+        ImGui::Text("-------------- REALISE DIGITAL FILTER --------------");
+        ImGui::Text("====================================================");
+
+        if (ImGui::Button("REALISE FILTER", ImVec2(362, 25))) {
+            // INITIALIZE THE TRANSFER FUNCTION OF H(Z)
+            std::vector<double> num = { 0.00184647, -0.007385884, 0.01107883, -0.0073858844, 0.0018464711 };
+            std::vector<double> den = { 1, 2.990801, 3.62682596, 2.07580297, 0.470359711 };
+            //std::vector<double> num = { 0, 0.44, 0.36, 0.02 };
+            //std::vector<double> den = { 1, 0.4, 0.18, -0.2 };
+            pLocalFilter->setGrayMarkel(num, den);
+
+            // GET LATTICE AND FEED_FORWARD GAINS
+            std::vector<double> vfFeedForward_a = pLocalFilter->getFeedForward();
+            std::vector<double> vfLattice_k = pLocalFilter->getLattice();
+            std::cout << "Lattice: ";
+            for (int i = 0; i < vfLattice_k.size(); i++) {
+                std::cout << vfLattice_k.at(i) << "  ";
+            }
+            std::cout << std::endl;
+            std::cout << "Feed-Forward: ";
+            for (int i = 0; i < vfFeedForward_a.size(); i++) {
+                std::cout << vfFeedForward_a.at(i) << "  ";
+            }
+            std::cout << std::endl;
+
+            // GET SIGNAL IN TIME DOMAIN
+            pLocalSignal->generateSignal(iSweepVariable);
+            std::vector<double> vfX = pLocalSignal->getSignal_Time();
+            std::cout << vfX.size() << " " << iSweepVariable << std::endl;
+
+            // CREATE CASCADE PARAMETERS
+            std::vector<double> vfY_1;
+            std::vector<double> vfY_2;
+            std::vector<double> vfY_3;
+            std::vector<double> vfY_4;
+            std::vector<double> vfY_5;
+            std::vector<double> vfY_6;
+            std::vector<double> vfY_7;
+            std::vector<double> vfY_8;
+            std::vector<double> vfY_9;
+            std::vector<double> vfY_10;
+            std::vector<double> vfY_11;
+            std::vector<double> vfY_FINAL;
+
+            // CREATE VECTORS FILLED WITH ZEROS
+            for (int i = 0; i < vfX.size(); i++) {
+                vfY_1.push_back(0);
+                vfY_2.push_back(0);
+                vfY_3.push_back(0);
+                vfY_4.push_back(0);
+                vfY_5.push_back(0);
+                vfY_6.push_back(0);
+                vfY_7.push_back(0);
+                vfY_8.push_back(0);
+                vfY_9.push_back(0);
+                vfY_10.push_back(0);
+                vfY_11.push_back(0);
+                vfY_FINAL.push_back(0);
+            }
+           
+            for (int i = 1; i < 1000; i++) {
+                for (int n = 0; n < vfX.size(); n++) {
+                    vfY_1[n] = (vfX[n] - vfLattice_k[3] * vfY_7[n-1]);
+
+                    vfY_2[n] = (vfY_1[n] - vfLattice_k[2] * vfY_6[n-1]);
+
+                    vfY_3[n] = (vfY_2[n] - vfLattice_k[1] * vfY_5[n - 1]);
+
+                    vfY_4[n] = (vfY_3[n] - vfLattice_k[0] * vfY_4[n - 1]);
+
+                    vfY_5[n] = (vfLattice_k[0] * vfY_4[n] + vfY_4[n - 1]);
+
+                    vfY_6[n] = (vfLattice_k[1] * vfY_3[n] + vfY_5[n - 1]);
+
+                    vfY_7[n] = (vfLattice_k[2] * vfY_2[n] + vfY_6[n - 1]);
+
+                    vfY_8[n] = (vfLattice_k[3] * vfY_1[n] + vfY_7[n - 1]);
+
+                    vfY_9[n] = (vfFeedForward_a[0] * vfY_8[n] + vfFeedForward_a[1] * vfY_7[n]);
+
+                    vfY_10[n] = (vfFeedForward_a[2] * vfY_6[n] + vfY_9[n]);
+
+                    vfY_11[n] = (vfFeedForward_a[3] * vfY_5[n] + vfY_10[n]);
+
+                    vfY_FINAL[n] = (vfFeedForward_a[4] * vfY_4[n] + vfY_11[n]);
+                }
+            }              
+
+            vfTime_Realisation = vfY_FINAL;
+            vfTime_Original = vfX;
+
+            vfTime_Y = vfTime_Original;
+            vfTime_X.clear();
+            for (int i = 0; i < vfTime_Y.size(); i++) {
+                vfTime_X.push_back(((double)i / (double)iSampleRate_Hz) * (double)iSignalLength_ms);
+            }
+
+            strTop_Title = "UNFILTERED SIGNAL: TIME DOMAIN";
+            strTop_X = "Time (ms)";
+            strTop_Y = "Amplitude (V)";
+
+            vfFreq_Y = vfTime_Realisation;
+            vfFreq_X.clear();
+            for (int i = 0; i < vfFreq_Y.size(); i++) {
+                vfFreq_X.push_back(((double)i / (double)iSampleRate_Hz) * (double)iSignalLength_ms);
+            }
+
+            strBottom_Title = "FILTERED SIGNAL - TIME DOMAIN";
+            strBottom_X = "Time (ms)";
+            strBottom_Y = "Amplitude (V)";
+
+            cond_Plot = ImGuiCond_Always;
+        }
+        if (ImGui::Button("MAGNITUDE##Mag_Realisation", ImVec2(179, 25))) {
+            // PLOT DATA BASED ON INPUT DATA             
+
+            vfTime_Y = plotFFT(true, vfTime_Original);
+            vfTime_X.clear();
+            for (int i = 0; i < vfTime_Y.size(); i++) {
+                vfTime_X.push_back(i);
+            }
+
+            strTop_Title = "UNFILTERED SIGNAL - MAGNITUDE SPECTRUM";
+            strTop_X = "Frequency (Hz)";
+            strTop_Y = "Amplitude (V)";
+
+            vfFreq_Y = plotFFT(true, vfTime_Realisation);
+            vfFreq_X.clear();
+            for (int i = 0; i < vfFreq_Y.size(); i++) {
+                vfFreq_X.push_back(i);
+            }
+
+            strBottom_Title = "FILTERED SIGNAL - MAGNITUDE SPECTRUM";
+            strBottom_X = "Frequency (Hz)";
+            strBottom_Y = "Amplitude (V)";
+
+            cond_Plot = ImGuiCond_Always;
+        }
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 29);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 183);
+        if (ImGui::Button("PHASE##Phase_Realisation", ImVec2(179, 25))) {
+            // PLOT DATA BASED ON INPUT DATA  
+            vfTime_Y = plotFFT(false, vfTime_Original);
+            vfTime_X.clear();
+            for (int i = 0; i < vfTime_Y.size(); i++) {
+                vfTime_X.push_back(i);
+            }
+
+            strTop_Title = "UNFILTERED SIGNAL - PHASE SPECTRUM";
+            strTop_X = "Phase Angle (Degrees)";
+            strTop_Y = "Amplitude (V)";
+
+            vfFreq_Y = plotFFT(false, vfTime_Realisation);
+            vfFreq_X.clear();
+            for (int i = 0; i < vfFreq_Y.size(); i++) {
+                vfFreq_X.push_back(i);
+            }
+
+            strBottom_Title = "FILTERED SIGNAL - PHASE SPECTRUM";
+            strBottom_X = "Phase Angle (Degrees)";
+            strBottom_Y = "Amplitude (V)";
 
             cond_Plot = ImGuiCond_Always;
         }
@@ -344,10 +528,6 @@ int main(int argc, char* argv[])
         vfBottom_X.clear();
 
         ImGui::End();        
-
-        // =======================
-        // Enter Program Code Here
-        // =======================
 
         // Final GUI Rendering 
         ImGui::Render();
