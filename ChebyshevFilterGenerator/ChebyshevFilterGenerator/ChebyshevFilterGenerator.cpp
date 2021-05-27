@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 
     int iOmegaPass_Hz = 42500;
     int iOmegaStop_Hz = 72250;
-    double iRipplePass = -0.3;
+    double iRipplePass = -0.25;
     double iRippleStop = -40;
 
     std::string strTop_Title;
@@ -348,8 +348,10 @@ int main(int argc, char* argv[])
 
         if (ImGui::Button("REALISE FILTER", ImVec2(362, 25))) {
             // INITIALIZE THE TRANSFER FUNCTION OF H(Z)
-            std::vector<double> num = { 0.00184647, -0.007385884, 0.01107883, -0.0073858844, 0.0018464711 };
-            std::vector<double> den = { 1, 2.990801, 3.62682596, 2.07580297, 0.470359711 };
+            //std::vector<double> num = { 0.971628, -3.886512, 5.829768, -3.886512, 0.971628 };
+            //std::vector<double> den = { 487.8392585, 1442.331698, 1733.023415, 983.71881, 221.1878345 };
+            std::vector<double> num = { 0.001991697025, -0.007966788101, 0.01195018215, -0.007966788101, 0.001991697025 };
+            std::vector<double> den = { 1, 2.956571602, 3.552447625, 2.016481439, 0.4534031049 };
             //std::vector<double> num = { 0, 0.44, 0.36, 0.02 };
             //std::vector<double> den = { 1, 0.4, 0.18, -0.2 };
             pLocalFilter->setGrayMarkel(num, den);
@@ -403,7 +405,7 @@ int main(int argc, char* argv[])
                 vfY_FINAL.push_back(0);
             }
            
-            for (int i = 1; i < 1000; i++) {
+            for (int i = 1; i < 2; i++) {
                 for (int n = 0; n < vfX.size(); n++) {
                     vfY_1[n] = (vfX[n] - vfLattice_k[3] * vfY_7[n-1]);
 
