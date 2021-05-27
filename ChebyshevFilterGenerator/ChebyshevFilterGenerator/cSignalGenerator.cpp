@@ -78,10 +78,11 @@ void cSignalGenerator::generateSignal(int iSweepType)
 		// Calculate the summation of 5 different frequencies, equally distanced
 		case 2:
 			double d = sin(2 * M_PI * m_iLowestFreq_Hz * t);
-			for (int j = 1; j <= 5; j++) {
-				double f = ((double)m_iHighestFreq_Hz / (double)5) * j;
+			for (int j = 1; j <= 500; j++) {
+				double f = ((double)m_iHighestFreq_Hz / (double)500) * j;
 				d = d + sin(2 * M_PI * f * t);
 			}
+			d = d + sin(2 * M_PI * 72250 * t) + sin(2 * M_PI * 42250 * t);
 			m_vfSignal_Time.push_back(d);
 			break;
 		}		
